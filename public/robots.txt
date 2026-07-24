@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://giaothuongquocte.hawee.vn/sitemap.xml

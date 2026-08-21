@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext'
 const copy = {
   vi: {
     title: 'Ngôi Sao Mai Không Chờ Đợi Ai',
-    body: 'Ngôi sao mai chỉ xuất hiện một lần mỗi ngày — cơ hội Early Bird của HAWEE International Trade Fair 2026 cũng vậy. Giữ chỗ hôm nay để cùng hàng trăm doanh nghiệp Việt bước vào hành trình xuất khẩu mới tại WTC Expo.',
+    body: 'Ngôi sao mai chỉ xuất hiện một lần mỗi ngày — cơ hội Early Bird của HAWEE International Trade Fair 2026 cũng vậy. Giữ chỗ hôm nay để cùng hàng trăm doanh nghiệp Việt bước vào hành trình xuất khẩu mới tại WTC Expo.',
     ctaPrimary: 'Giữ chỗ Early Bird ngay',
     ctaSecondary: 'Xem bảng giá & quyền lợi',
   },

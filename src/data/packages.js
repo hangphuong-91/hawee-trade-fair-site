@@ -1,7 +1,18 @@
 export const earlyBirdDeadline = '2026-07-31T23:59:59+07:00'
 
-// "Giờ Vàng Cuối Tuần" — ưu đãi 50% giá gian hàng, áp dụng đến hết Chủ Nhật 26/7.
-// Sau mốc này, giá tự động trở về mức Early Bird hiện tại (earlyBird bên dưới) đến hết 31/7.
+// Tính % giảm giá thật từ 2 chuỗi giá đã format (vd. "6.000.000" so với "10.000.000") — không hardcode
+// số % ở nơi hiển thị, tránh lệch khi đổi giá (Ticket A và B có % giảm khác nhau, không cùng 1 mức).
+export function parsePrice(str) {
+  return parseInt(String(str).replace(/\./g, ''), 10)
+}
+export function discountPercent(current, original) {
+  return Math.round((1 - parsePrice(current) / parsePrice(original)) * 100)
+}
+
+// "Giờ Vàng Cuối Tuần" — giá gian hàng thấp nhất, áp dụng đến hết Chủ Nhật 26/7.
+// Mức giảm thực tế so với giá tiêu chuẩn khác nhau theo từng vé (xem discountPercent() bên dưới) —
+// không cố định 1 con số % cho cả 2 vé. Sau mốc 26/7, giá tự động trở về mức Early Bird (earlyBird)
+// đến hết 31/7, rồi trở về giá tiêu chuẩn (standard).
 export const flashSaleDeadline = '2026-07-26T23:59:59+07:00'
 
 export const tickets = [
@@ -10,8 +21,9 @@ export const tickets = [
     tag: 'Vị trí Vàng',
     tagEn: 'Gold Position',
     slots: 14,
+    soldOut: true,
     flashSale: '6.000.000',
-    earlyBird: '10.000.000',
+    earlyBird: '7.500.000',
     standard: '12.000.000',
     area: 'Gian hàng tiêu chuẩn 3x3m² gồm: khung gian hàng, 1 bàn & 2 ghế, 1 đèn chiếu sáng 1m2, đề can bảng tên tiêu chuẩn, 1 sọt rác',
     areaEn: 'Standard 3x3m² booth including: booth frame, 1 table & 2 chairs, 1 spotlight, standard nameplate sticker, 1 waste bin',
@@ -22,7 +34,7 @@ export const tickets = [
       'Tiếp cận Buyer đích danh — BTC gửi hồ sơ năng lực đến nhà mua hàng tiềm năng',
       'Hiện diện tại Khu VIP Business Matching',
       'Ưu tiên Business Matching 1-1 với nhà phân phối phù hợp nhất',
-      'Đài thọ 100% khoá đào tạo "Xanh hoá để Xuất khẩu" (3 ngày, trị giá 3.000.000đ)',
+      'Đài thọ 100% khoá đào tạo "Xanh hoá để Xuất khẩu" (3 ngày, trị giá 3.000.000đ)',
     ],
     benefitsEn: [
       'Gold-position booth, capturing maximum foot traffic',
@@ -41,14 +53,14 @@ export const tickets = [
     tagEn: 'Standard Booth',
     slots: 34,
     flashSale: '4.000.000',
-    earlyBird: '6.000.000',
+    earlyBird: '5.000.000',
     standard: '8.000.000',
     area: 'Gian hàng tiêu chuẩn 3x3m² gồm: khung gian hàng, 1 bàn & 2 ghế, 1 đèn chiếu sáng 1m2, đề can bảng tên tiêu chuẩn, 1 sọt rác',
     areaEn: 'Standard 3x3m² booth including: booth frame, 1 table & 2 chairs, 1 spotlight, standard nameplate sticker, 1 waste bin',
     benefits: [
       'Gian hàng tiêu chuẩn 9m²',
       'Logo doanh nghiệp trên Backdrop chung của HAWEE Pavillon',
-      'Đài thọ 100% khoá đào tạo "Xanh hoá để Xuất khẩu" (3 ngày, trị giá 3.000.000đ)',
+      'Đài thọ 100% khoá đào tạo "Xanh hoá để Xuất khẩu" (3 ngày, trị giá 3.000.000đ)',
     ],
     benefitsEn: [
       'Standard 9m² booth',
@@ -62,9 +74,9 @@ export const tickets = [
 export const trainingProgram = {
   value: '3.000.000',
   modules: [
-    { title: 'Xây dựng doanh nghiệp xanh sẵn sàng cho xuất khẩu', titleEn: 'Building an Export-Ready Green Business', duration: '2 ngày', durationEn: '2 days' },
-    { title: 'Xu hướng thiết kế bao bì cho cạnh tranh quốc tế', titleEn: 'Packaging Design Trends for Global Competitiveness', duration: '0.5 ngày', durationEn: '0.5 day' },
-    { title: 'Xây dựng thương hiệu & kỹ năng tham gia hội chợ quốc tế', titleEn: 'Branding & International Trade Fair Skills', duration: '0.5 ngày', durationEn: '0.5 day' },
+    { title: 'Xây dựng doanh nghiệp xanh sẵn sàng cho xuất khẩu', titleEn: 'Building an Export-Ready Green Business', duration: '2 ngày', durationEn: '2 days' },
+    { title: 'Xu hướng thiết kế bao bì cho cạnh tranh quốc tế', titleEn: 'Packaging Design Trends for Global Competitiveness', duration: '0.5 ngày', durationEn: '0.5 day' },
+    { title: 'Xây dựng thương hiệu & kỹ năng tham gia hội chợ quốc tế', titleEn: 'Branding & International Trade Fair Skills', duration: '0.5 ngày', durationEn: '0.5 day' },
   ],
 }
 
@@ -77,7 +89,7 @@ export const cashSponsorships = [
     priceEn: '100,000,000đ',
     label: 'Nổi Bật Vị Thế',
     labelEn: 'Maximum Visibility',
-    desc: 'Gói duy nhất xuất hiện tại Cổng chính & Trailer sự kiện — điểm chạm đầu tiên và mạnh mẽ nhất với toàn bộ khách tham quan và Buyer quốc tế. Định vị "Nổi bật nhất" trong Video Recap.',
+    desc: 'Gói duy nhất xuất hiện tại Cổng chính & Trailer sự kiện — điểm chạm đầu tiên và mạnh mẽ nhất với toàn bộ khách tham quan và Buyer quốc tế. Định vị "Nổi bật nhất" trong Video Recap.',
     descEn:
       'The only package featured at the Main Gate and event trailer — the first and strongest touchpoint with every visitor and international buyer. Positioned as the standout brand in the recap video.',
   },

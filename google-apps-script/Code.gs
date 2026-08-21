@@ -108,11 +108,13 @@ function verifyRecaptcha(token) {
   }
 }
 
-// Tiện ích bảo trì: gọi 1 lần (payload { action: 'fix_headers' }) để đồng bộ lại dòng tiêu đề
-// của 2 sheet theo đúng HEADERS_GIAN_HANG / HEADERS_TAI_TRO hiện tại. Cần thiết vì getOrCreateSheet()
-// chỉ ghi header lúc TẠO MỚI sheet — khi đổi cấu trúc cột (thêm/bớt/đổi thứ tự field) mà sheet đã
-// có sẵn dữ liệu cũ, header cũ sẽ không tự cập nhật. Chỉ ghi đè dòng 1, không đụng dữ liệu bên dưới —
-// an toàn để gọi lại nhiều lần (idempotent).
+// Tiện ích bảo trì: gọi 1 lần (payload { action: 'fix_headers', admin_key: '...' }) để đồng bộ lại
+// dòng tiêu đề của 2 sheet theo đúng HEADERS_GIAN_HANG / HEADERS_TAI_TRO hiện tại. Cần thiết vì
+// getOrCreateSheet() chỉ ghi header lúc TẠO MỚI sheet — khi đổi cấu trúc cột mà sheet đã có sẵn dữ
+// liệu cũ, header cũ sẽ không tự cập nhật. Chỉ ghi đè dòng 1, không đụng dữ liệu bên dưới — an toàn
+// để gọi lại nhiều lần (idempotent). Yêu cầu admin_key khớp ADMIN_SECRET vì URL endpoint này là công
+// khai (nằm trong bundle JS của site) — nếu không xác thực, bất kỳ ai biết URL + tên action đều có
+// thể gọi được.
 function fixHeaders() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   [
@@ -132,6 +134,10 @@ function doPost(e) {
     var data = parseRequest(e);
 
     if (data.action === 'fix_headers') {
+      if (!ADMIN_SECRET || data.admin_key !== ADMIN_SECRET) {
+        result = { result: 'error', error: 'unauthorized' };
+        return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+      }
       fixHeaders();
       result.fixed_headers = true;
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);

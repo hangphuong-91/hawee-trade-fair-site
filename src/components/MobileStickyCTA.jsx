@@ -19,7 +19,7 @@ export default function MobileStickyCTA() {
   if (!visible) return null
 
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-rose-100 px-4 py-3 sticky-cta-shadow">
+    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md px-4 py-3 sticky-cta-shadow">
       <a href="#dang-ky" className="btn-primary w-full text-center block py-3">
         {copy[lang]}
       </a>

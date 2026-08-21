@@ -9,6 +9,7 @@ const copy = {
       { href: '#doanh-nghiep', label: 'Doanh nghiệp tham gia' },
       { href: '#lich-trinh', label: 'Lịch trình' },
       { href: '#goi-tham-gia', label: 'Gói tham gia' },
+      { href: '#tai-tro', label: 'Đơn vị Tài trợ' },
       { href: '#dang-ky', label: 'Đăng ký' },
     ],
     cta: 'Giữ chỗ gian hàng',
@@ -20,6 +21,7 @@ const copy = {
       { href: '#doanh-nghiep', label: 'Exhibitors' },
       { href: '#lich-trinh', label: 'Schedule' },
       { href: '#goi-tham-gia', label: 'Booth Packages' },
+      { href: '#tai-tro', label: 'Sponsors' },
       { href: '#dang-ky', label: 'Register' },
     ],
     cta: 'Reserve a Booth',
@@ -50,7 +52,7 @@ export default function Header() {
           <img
             src={scrolled ? '/hawee-logo.png' : '/hawee-logo-white.png'}
             alt="HAWEE"
-            className="h-9 w-auto"
+            className="hidden sm:block h-9 w-auto"
           />
           <span className={`font-semibold text-sm hidden sm:inline ${scrolled ? 'text-dark' : 'text-white'}`}>
             {c.tagline}

@@ -7,7 +7,7 @@ const copy = {
   vi: {
     tag: 'HAWEE International Trade Fair',
     title: 'Điểm Nhấn Tại HAWEE Pavillon',
-    sub: 'Pavillon tôn vinh và nâng cao năng lực cạnh tranh của doanh nghiệp phụ nữ, hướng đến phát triển bền vững và hội nhập quốc tế.',
+    sub: 'Pavillon tôn vinh và nâng cao năng lực cạnh tranh của doanh nghiệp phụ nữ, hướng đến phát triển bền vững và hội nhập quốc tế.',
     banner: 'Hoạt động điểm nhấn xuyên suốt hành trình',
     cta: 'Giữ chỗ gian hàng ngay',
   },

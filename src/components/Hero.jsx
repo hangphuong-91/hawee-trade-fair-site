@@ -6,7 +6,7 @@ export default function Hero() {
         alt="HAWEE International Trade Fair"
         className="w-full h-auto block"
       />
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
+      <div className="hidden sm:block absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
     </section>
   )
 }

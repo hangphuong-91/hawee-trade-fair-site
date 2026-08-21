@@ -1,6 +1,6 @@
-// Báo chí đưa tin về "Hội chợ hàng Việt Nam tiêu biểu xuất khẩu" (HCM City Export) —
+// Báo chí đưa tin về "Hội chợ hàng Việt Nam tiêu biểu xuất khẩu" (HCM City Export) —
 // kỳ 2025, cùng chuỗi sự kiện với HAWEE International Trade Fair 2026.
-// Các bài báo gốc đều bằng tiếng Việt — titleEn chỉ là bản dịch tham khảo cho khách quốc tế,
+// Các bài báo gốc đều bằng tiếng Việt — titleEn chỉ là bản dịch tham khảo cho khách quốc tế,
 // không phải bản dịch chính thức của toà soạn.
 export const pressArticles = [
   {
@@ -12,7 +12,7 @@ export const pressArticles = [
     url: 'https://nld.com.vn/gan-750-doanh-nghiep-tham-gia-hcmc-city-export-2025-196250327212352967.htm',
   },
   {
-    title: 'Gia tăng hàng Việt trên thị trường quốc tế',
+    title: 'Gia tăng hàng Việt trên thị trường quốc tế',
     titleEn: 'Vietnamese goods gaining ground in international markets',
     source: 'Sài Gòn Giải Phóng',
     date: '03/04/2025',
@@ -20,7 +20,7 @@ export const pressArticles = [
     url: 'https://www.sggp.org.vn/gia-tang-hang-viet-tren-thi-truong-quoc-te-post788946.html',
   },
   {
-    title: 'Hơn 200 nhà mua hàng quốc tế tìm kiếm nguồn hàng tại HCM City Export 2025',
+    title: 'Hơn 200 nhà mua hàng quốc tế tìm kiếm nguồn hàng tại HCM City Export 2025',
     titleEn: 'Over 200 international buyers sourcing at HCM City Export 2025',
     source: 'Cổng TTĐT Chính phủ TP.HCM',
     date: '27/03/2025',
@@ -36,7 +36,7 @@ export const pressArticles = [
     url: 'https://web.ts24.com.vn/blog/tin-tuc-3/hcm-city-export-2025-be-phong-cho-hang-viet-vuon-xa-14950',
   },
   {
-    title: 'Sắp diễn ra Hội chợ hàng Việt Nam tiêu biểu xuất khẩu và Hội chợ về quà tặng, quà lưu niệm',
+    title: 'Sắp diễn ra Hội chợ hàng Việt Nam tiêu biểu xuất khẩu và Hội chợ về quà tặng, quà lưu niệm',
     titleEn: 'Vietnam Typical Export Products Fair and Gifts & Souvenirs Fair coming soon',
     source: 'Bộ Công Thương',
     date: '05/02/2025',

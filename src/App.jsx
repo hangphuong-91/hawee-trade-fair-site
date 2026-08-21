@@ -17,6 +17,7 @@ import Packages from './components/Packages'
 import FloorPlan from './components/FloorPlan'
 import FinalCTA from './components/FinalCTA'
 import RegisterForm from './components/RegisterForm'
+import Sponsors from './components/Sponsors'
 import PressCoverage from './components/PressCoverage'
 import Footer from './components/Footer'
 import MobileStickyCTA from './components/MobileStickyCTA'
@@ -45,6 +46,7 @@ export default function App() {
         <FloorPlan />
         <FinalCTA />
         <RegisterForm />
+        <Sponsors />
         <PressCoverage />
       </main>
       <Footer />

@@ -216,7 +216,7 @@ body {
   background:
     radial-gradient(ellipse 900px 500px at 25% 0%, rgba(232, 58, 120, 0.28) 0%, transparent 60%),
     radial-gradient(ellipse 700px 550px at 90% 100%, rgba(201, 24, 127, 0.22) 0%, transparent 60%),
-    linear-gradient(180deg, #1B0E2B 0%, #33103A 55%, #50002F 100%);
+    linear-gradient(180deg, #2C0019 0%, #3D0025 55%, #50002F 100%);
 }
 .stat-tag {
   background: rgba(80, 0, 47, 0.45);
@@ -274,10 +274,10 @@ body {
   box-shadow: 0 -10px 24px rgba(26, 26, 26, 0.10);
 }
 
-/* STAR SKY — concept "ngôi sao mai" mở màn ngay sau hero */
+/* STAR SKY — concept "ngôi sao mai" mở màn ngay sau hero, cùng tông wine với banner (#50002F) */
 .star-sky {
   position: relative;
-  background: linear-gradient(180deg, #0B0620 0%, #1B0E2B 45%, #2C1240 75%, #3A1450 100%);
+  background: linear-gradient(180deg, #1A0010 0%, #33001D 45%, #43002A 75%, #50002F 100%);
 }
 .star-field {
   position: absolute;
@@ -316,7 +316,7 @@ body {
   width: 340px;
   height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(232, 58, 120, 0.45) 0%, rgba(80, 20, 180, 0.25) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(232, 58, 120, 0.45) 0%, rgba(254, 177, 46, 0.28) 45%, transparent 70%);
   filter: blur(20px);
   animation: star-pulse 3.5s ease-in-out infinite;
 }
@@ -512,7 +512,7 @@ body {
   background:
     radial-gradient(ellipse 480px 380px at 15% 0%, rgba(232, 58, 120, 0.38) 0%, transparent 60%),
     radial-gradient(ellipse 420px 360px at 100% 100%, rgba(217, 138, 43, 0.28) 0%, transparent 60%),
-    linear-gradient(165deg, #0B0620 0%, #1B0E2B 45%, #33103A 75%, #50002F 100%);
+    linear-gradient(165deg, #1A0010 0%, #2C0019 45%, #3D0025 75%, #50002F 100%);
 }
 .flash-glow-orb {
   position: absolute;

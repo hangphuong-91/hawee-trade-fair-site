@@ -14,7 +14,7 @@ export const signatureActivities = [
   {
     label: 'VIP Tour & Livestream',
     labelEn: 'VIP Tour & Livestream',
-    desc: 'Dẫn đoàn đại diện cơ quan, hiệp hội quốc tế tham quan HAWEE Pavillon',
+    desc: 'Dẫn đoàn đại diện cơ quan, hiệp hội quốc tế tham quan HAWEE Pavillon',
     descEn: 'Guided tours of HAWEE Pavillon for delegations from government agencies and international associations',
   },
   {

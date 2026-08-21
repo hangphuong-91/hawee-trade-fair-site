@@ -32,7 +32,7 @@ const industries = [
   {
     icon: Truck,
     image: '/industries/dich-vu-xuat-khau.jpg',
-    title: 'Dịch vụ hỗ trợ xuất khẩu',
+    title: 'Dịch vụ hỗ trợ xuất khẩu',
     titleEn: 'Export Support Services',
     highlight: 'Logistics · Ngân hàng · Bảo hiểm',
     highlightEn: 'Logistics · Banking · Insurance',
@@ -56,7 +56,7 @@ const industries = [
 ]
 
 const copy = {
-  vi: { tag: 'Ngành hàng chủ lực', title: '6 Nhóm Ngành Trọng Điểm', sub: 'Mỗi ngành hàng là một vì sao trên bầu trời xuất khẩu — đâu là ánh sáng của doanh nghiệp bạn?' },
+  vi: { tag: 'Ngành hàng chủ lực', title: '6 Nhóm Ngành Trọng Điểm', sub: 'Mỗi ngành hàng là một vì sao trên bầu trời xuất khẩu — đâu là ánh sáng của doanh nghiệp bạn?' },
   en: { tag: 'Key Industries', title: '6 Priority Industry Groups', sub: 'Every industry is a star in the export sky — which one lights up your business?' },
 }
 

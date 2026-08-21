@@ -7,12 +7,12 @@ export const memberJourney = [
     dates: '16/7 – 21/10',
     goal: 'Kích hoạt truyền thông, nâng cao năng lực doanh nghiệp và chuẩn bị tệp Buyer chất lượng',
     goalEn: 'Activate communications, strengthen business capacity, and build a quality buyer pipeline',
-    theme: 'from-[#2B6FD9] to-[#3AC4E8]',
+    theme: 'from-[#D98A2B] to-[#FEB12E]',
     items: [
       {
-        title: 'Huấn luyện thực chiến "Xanh hoá để Xuất khẩu"',
+        title: 'Huấn luyện thực chiến "Xanh hoá để Xuất khẩu"',
         titleEn: '"Going Green for Export" Hands-On Training',
-        desc: '3 chuyên đề chuyên sâu: ESG, Bao bì quốc tế, Kỹ năng hội chợ',
+        desc: '3 chuyên đề chuyên sâu: ESG, Bao bì quốc tế, Kỹ năng hội chợ',
         descEn: '3 in-depth modules: ESG, international packaging, and trade-fair skills',
       },
       {
@@ -28,7 +28,7 @@ export const memberJourney = [
         descEn: 'The "HAWEE Green Export Ready" digital certificate — a shared identity across avatars and banners',
       },
       {
-        title: 'Chiến dịch "Tiên phong Xuất khẩu Xanh"',
+        title: 'Chiến dịch "Tiên phong Xuất khẩu Xanh"',
         titleEn: '"Green Export Pioneers" Campaign',
         desc: 'Chuỗi bài viết & video giới thiệu chân dung doanh nghiệp trên kênh HAWEE và đối tác',
         descEn: 'A series of articles and videos profiling businesses across HAWEE and partner channels',
@@ -54,13 +54,13 @@ export const memberJourney = [
       {
         title: 'Showcase sân khấu lớn',
         titleEn: 'Main Stage Showcase',
-        desc: '"Lực lượng Nữ chủ DN Xuất khẩu Tiên phong" — toạ đàm tôn vinh giải pháp xanh',
+        desc: '"Lực lượng Nữ chủ DN Xuất khẩu Tiên phong" — toạ đàm tôn vinh giải pháp xanh',
         descEn: '"Pioneering Women Exporters" — a talk celebrating green solutions',
       },
       {
         title: 'HAWEE Pavillon VIP Tour & Livestream',
         titleEn: 'HAWEE Pavillon VIP Tour & Livestream',
-        desc: 'Dẫn đoàn đại diện cơ quan, hiệp hội quốc tế tham quan trực tiếp gian hàng',
+        desc: 'Dẫn đoàn đại diện cơ quan, hiệp hội quốc tế tham quan trực tiếp gian hàng',
         descEn: 'Guided booth visits for delegations from government agencies and international associations',
       },
       {
@@ -72,7 +72,7 @@ export const memberJourney = [
       {
         title: 'Talkshow "Góc Trực Diện"',
         titleEn: '"Face-to-Face Corner" Talk Show',
-        desc: 'Interview Booth phỏng vấn buyer quốc tế, phát ngay trên LED Pavillon & fanpage',
+        desc: 'Interview Booth phỏng vấn buyer quốc tế, phát ngay trên LED Pavillon & fanpage',
         descEn: 'An interview booth capturing international buyer feedback, broadcast live on the Pavillon LED screen and fan page',
       },
     ],
@@ -84,7 +84,7 @@ export const memberJourney = [
     titleEn: 'After The Fair',
     dates: 'Sau 24/10',
     datesEn: 'After Oct 24',
-    goal: 'Duy trì hiệu ứng truyền thông và chăm sóc các doanh nghiệp xuất khẩu, Buyer đã đồng hành cùng HAWEE',
+    goal: 'Duy trì hiệu ứng truyền thông và chăm sóc các doanh nghiệp xuất khẩu, Buyer đã đồng hành cùng HAWEE',
     goalEn: 'Sustain media momentum and nurture the exporters and buyers who took part with HAWEE',
     theme: 'from-[#50002F] to-[#9D1450]',
     items: [

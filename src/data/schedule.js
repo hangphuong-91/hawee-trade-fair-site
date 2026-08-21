@@ -18,8 +18,8 @@ export const schedule = [
         time: '14:00 – 17:00',
         location: 'WTC Expo',
         activity: [
-          'Hội nghị Quốc tế "Sản xuất xanh – Xuất khẩu xanh"',
-          'AI và tự động hóa, cách mạng hóa năng suất và giá trị xuất khẩu',
+          'Hội nghị Quốc tế "Sản xuất xanh – Xuất khẩu xanh"',
+          'AI và tự động hóa, cách mạng hóa năng suất và giá trị xuất khẩu',
         ],
         activityEn: [
           '"Green Manufacturing – Green Exports" International Conference',
@@ -33,7 +33,7 @@ export const schedule = [
         activity: [
           'Trưng bày sản phẩm',
           'Kết nối giao thương B2B',
-          'Livestream xuất khẩu (KOL/KOC)',
+          'Livestream xuất khẩu (KOL/KOC)',
           'Tri ân khách hàng',
           'Tham quan nhà máy & vùng nguyên liệu',
         ],
@@ -57,8 +57,8 @@ export const schedule = [
         time: '09:00 – 12:00',
         location: 'WTC Expo',
         activity: [
-          'Diễn đàn "Đẩy mạnh liên kết hướng đến xuất khẩu xanh"',
-          'Chuỗi cung ứng linh hoạt và chiến lược xuất khẩu Việt Nam trong bối cảnh đa dạng hóa',
+          'Diễn đàn "Đẩy mạnh liên kết hướng đến xuất khẩu xanh"',
+          'Chuỗi cung ứng linh hoạt và chiến lược xuất khẩu Việt Nam trong bối cảnh đa dạng hóa',
         ],
         activityEn: [
           '"Strengthening Linkages Toward Green Exports" forum',
@@ -72,7 +72,7 @@ export const schedule = [
         activity: [
           'Trưng bày sản phẩm',
           'Kết nối giao thương B2B',
-          'Livestream xuất khẩu (KOL/KOC)',
+          'Livestream xuất khẩu (KOL/KOC)',
           'Hội thảo, tập huấn đồng hành cùng hội chợ',
           'Tri ân khách hàng',
           'Tham quan nhà máy & vùng nguyên liệu',
@@ -107,7 +107,7 @@ export const schedule = [
         locationEn: 'WTC Expo, factories, raw-material regions',
         activity: [
           'Trưng bày sản phẩm',
-          'Livestream xuất khẩu (KOL/KOC)',
+          'Livestream xuất khẩu (KOL/KOC)',
           'Hội thảo, tập huấn đồng hành cùng hội chợ',
           'Tri ân khách hàng',
           'Tham quan nhà máy & vùng nguyên liệu',

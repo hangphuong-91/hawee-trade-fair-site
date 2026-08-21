@@ -3,19 +3,23 @@ import { Check, X, Flame, Gift, BookOpen, Package, Award } from 'lucide-react'
 import FadeUp from './FadeUp'
 import EarlyBirdCountdown from './EarlyBirdCountdown'
 import SponsorCTA from './SponsorCTA'
-import { tickets, trainingProgram, cashSponsorships, sponsorBenefitTable, inKindSponsorships } from '../data/packages'
+import { tickets, trainingProgram, cashSponsorships, sponsorBenefitTable, inKindSponsorships, discountPercent } from '../data/packages'
 import { useFlashSale } from '../lib/useFlashSale'
+import { useEarlyBird } from '../lib/useEarlyBird'
 import { useLanguage } from '../context/LanguageContext'
 
 const copy = {
   vi: {
-    slotsLabel: (n) => `Chỉ ${n} suất`,
-    flashLabel: 'Giờ Vàng Cuối Tuần — Ưu đãi 50%',
-    earlyBirdLabel: 'Early Bird — trước 31/7',
+    flashLabel: 'Giờ Vàng (đến 26/7)',
+    earlyBirdLabel: 'Early Bird (đến 31/7)',
+    standardLabel: 'Giá chuẩn (sau 31/7)',
     holdTicket: (code) => `Giữ vé ${code} ngay`,
+    soldOutBadge: 'Đã Hết Vé',
+    soldOutCta: 'Ticket A Đã Hết Chỗ',
+    limitedBadge: 'Số lượng có hạn — sắp hết chỗ',
     ticketsTag: 'Vé tham gia',
     ticketsTitle: 'Combo Vé HAWEE Pavillon',
-    ticketsSub: 'Chọn tấm vé đưa doanh nghiệp bạn bước vào ngày hội xuất khẩu lớn nhất năm.',
+    ticketsSub: 'Ticket A (Vị trí Vàng) đã hết chỗ. Ticket B chỉ còn số lượng giới hạn — giữ vé ngay trước khi hết!',
     demoAlt: 'Demo Gian hàng Ticket A — HAWEE International Trade Fair',
     demoCaption: 'Demo Gian hàng Ticket A — mỗi vé đều được dựng backdrop riêng theo bộ nhận diện HAWEE.',
     giftRibbon: 'TẶNG KÈM',
@@ -38,13 +42,16 @@ const copy = {
     inKindTitle: 'Quyền Lợi Tài Trợ Hiện Vật',
   },
   en: {
-    slotsLabel: (n) => `Only ${n} slots`,
-    flashLabel: 'Weekend Flash Hour — 50% Off',
-    earlyBirdLabel: 'Early Bird — before Jul 31',
+    flashLabel: 'Flash Hour (thru Jul 26)',
+    earlyBirdLabel: 'Early Bird (thru Jul 31)',
+    standardLabel: 'Standard (after Jul 31)',
     holdTicket: (code) => `Reserve ${code} Now`,
+    soldOutBadge: 'Sold Out',
+    soldOutCta: 'Ticket A Sold Out',
+    limitedBadge: 'Limited spots left — almost full',
     ticketsTag: 'Booth Tickets',
     ticketsTitle: 'HAWEE Pavillon Booth Combos',
-    ticketsSub: "Choose the ticket that brings your business into the year's biggest export event.",
+    ticketsSub: 'Ticket A (Gold Position) is sold out. Ticket B has only a limited number of spots left — reserve yours before they run out!',
     demoAlt: 'Ticket A Booth Demo — HAWEE International Trade Fair',
     demoCaption: 'Ticket A booth demo — every ticket comes with its own backdrop under the HAWEE brand identity.',
     giftRibbon: 'BONUS',
@@ -70,19 +77,27 @@ const copy = {
 
 function TicketCard({ t, i, lang, c }) {
   const { active: flashActive } = useFlashSale()
+  const earlyBirdActive = useEarlyBird()
 
   return (
     <FadeUp delay={i * 0.1}>
-      <div className={`ticket-card flex flex-col sm:flex-row card-hover ${t.highlight ? 'bg-gradient-hawee text-white' : 'bg-white border border-rose-50'}`}>
+      <div className={`ticket-card flex flex-col sm:flex-row card-hover ${t.highlight ? 'bg-gradient-hawee text-white' : 'bg-white border border-rose-50'} ${t.soldOut ? 'opacity-75 saturate-[0.4]' : ''}`}>
         <div className="flex-1 p-7 sm:p-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className={`text-xs font-bold uppercase tracking-widest rounded-full px-3 py-1 ${t.highlight ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}>
               {t.code}
             </span>
-            <span className={`fomo-badge text-xs font-semibold rounded-full px-3 py-1 flex items-center gap-1 ${t.highlight ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}>
-              <Flame size={12} />
-              {c.slotsLabel(t.slots)}
-            </span>
+            {t.soldOut && (
+              <span className="text-xs font-bold uppercase tracking-widest rounded-full px-3 py-1 bg-gray-700 text-white">
+                {c.soldOutBadge}
+              </span>
+            )}
+            {!t.soldOut && (
+              <span className="fomo-badge inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest rounded-full px-3 py-1 bg-[#E8593A] text-white">
+                <Flame size={12} className="shrink-0" />
+                {c.limitedBadge}
+              </span>
+            )}
           </div>
           <h3 className={`text-xl font-semibold mb-1 ${t.highlight ? 'text-white' : 'text-dark'}`}>
             {lang === 'en' ? t.tagEn : t.tag}
@@ -102,26 +117,55 @@ function TicketCard({ t, i, lang, c }) {
 
         <div className="ticket-seam-h ticket-seam-v" />
 
-        <div className="ticket-stub sm:w-56 shrink-0 p-7 sm:p-8 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-4 text-center">
-          <div>
-            {flashActive ? (
-              <>
-                <p className={`fomo-badge text-[12px] uppercase tracking-widest font-semibold flex items-center gap-1 ${t.highlight ? 'text-white/90' : 'text-primary'}`}>
-                  <Flame size={12} />
+        <div className="ticket-stub sm:w-60 shrink-0 p-7 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
+          {t.soldOut ? (
+            <p className={`text-sm font-semibold leading-relaxed ${t.highlight ? 'text-white/90' : 'text-muted'}`}>
+              {c.soldOutCta}
+            </p>
+          ) : (
+          <>
+          <div className="w-full space-y-2.5">
+            {flashActive && (
+              <div>
+                <p className={`text-xs font-bold uppercase tracking-wide flex items-center justify-center gap-1 ${t.highlight ? 'text-white' : 'text-primary'}`}>
+                  <Flame size={13} className="shrink-0" />
                   {c.flashLabel}
                 </p>
-                <p className={`text-3xl font-black ${t.highlight ? 'text-white' : 'text-primary'}`}>{t.flashSale}đ</p>
-                <p className={`text-xs line-through ${t.highlight ? 'text-white/60' : 'text-gray-400'}`}>{t.earlyBird}đ</p>
-              </>
-            ) : (
-              <>
-                <p className={`text-[12px] uppercase tracking-widest font-semibold ${t.highlight ? 'text-white/70' : 'text-muted'}`}>
+                <p className="flex items-baseline justify-center gap-2 mt-1">
+                  <span className={`text-3xl sm:text-4xl font-black ${t.highlight ? 'text-white' : 'text-primary'}`}>{t.flashSale}đ</span>
+                  <span className="text-xs font-bold text-white bg-[#E8593A] rounded-full px-2 py-0.5">
+                    -{discountPercent(t.flashSale, t.standard)}%
+                  </span>
+                </p>
+              </div>
+            )}
+            {earlyBirdActive && (
+              <div className={flashActive ? 'opacity-50' : ''}>
+                <p className={`text-xs uppercase tracking-wide ${flashActive ? 'font-medium' : 'font-bold'} ${t.highlight ? 'text-white/85' : 'text-muted'}`}>
                   {c.earlyBirdLabel}
                 </p>
-                <p className={`text-2xl font-bold ${t.highlight ? 'text-white' : 'text-primary'}`}>{t.earlyBird}đ</p>
-                <p className={`text-xs line-through ${t.highlight ? 'text-white/60' : 'text-gray-400'}`}>{t.standard}đ</p>
-              </>
+                <p className="flex items-baseline justify-center gap-2 mt-1">
+                  <span className={`font-black ${flashActive ? 'text-base line-through' : 'text-3xl sm:text-4xl'} ${t.highlight ? 'text-white' : 'text-primary'}`}>
+                    {t.earlyBird}đ
+                  </span>
+                  {!flashActive && (
+                    <span className="text-xs font-bold text-white bg-[#E8593A] rounded-full px-2 py-0.5">
+                      -{discountPercent(t.earlyBird, t.standard)}%
+                    </span>
+                  )}
+                </p>
+              </div>
             )}
+            <div className={earlyBirdActive ? 'opacity-45' : ''}>
+              <p className={`text-xs uppercase tracking-wide ${earlyBirdActive ? '' : 'font-bold'} ${t.highlight ? 'text-white/85' : 'text-muted'}`}>
+                {c.standardLabel}
+              </p>
+              {earlyBirdActive ? (
+                <p className={`text-sm line-through mt-0.5 ${t.highlight ? 'text-white/70' : 'text-gray-400'}`}>{t.standard}đ</p>
+              ) : (
+                <p className={`text-3xl sm:text-4xl font-black mt-1 ${t.highlight ? 'text-white' : 'text-primary'}`}>{t.standard}đ</p>
+              )}
+            </div>
           </div>
           <a
             href="#dang-ky"
@@ -131,6 +175,8 @@ function TicketCard({ t, i, lang, c }) {
           >
             {c.holdTicket(t.code)}
           </a>
+          </>
+          )}
         </div>
       </div>
     </FadeUp>
@@ -189,11 +235,11 @@ export default function Packages() {
               <span className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D98A2B] to-[#E8593A] flex items-center justify-center gift-icon-glow mb-5">
                 <Gift className="text-white" size={30} />
               </span>
-              <p className="label-tag mb-2" style={{ color: '#D98A2B' }}>
+              <p className="label-tag text-base md:text-lg mb-3" style={{ color: '#D98A2B' }}>
                 {c.giftTag}
               </p>
-              <h3 className="text-2xl md:text-3xl font-bold text-dark mb-2">{c.giftTitle}</h3>
-              <p className="text-muted text-sm mb-8">{c.giftValue(trainingProgram.value)}</p>
+              <h3 className="text-3xl md:text-4xl font-bold text-dark mb-3">{c.giftTitle}</h3>
+              <p className="text-muted text-base md:text-lg mb-8">{c.giftValue(trainingProgram.value)}</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
                 {trainingProgram.modules.map((m, i) => {
@@ -201,7 +247,7 @@ export default function Packages() {
                   return (
                     <div key={m.title} className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 text-left card-hover">
                       <Icon className="text-primary mb-3" size={22} />
-                      <p className="text-dark text-sm font-semibold leading-snug mb-2">
+                      <p className="text-dark text-base md:text-lg font-semibold leading-snug mb-2">
                         {lang === 'en' ? m.titleEn : m.title}
                       </p>
                       <span className="inline-block text-[12px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-1">

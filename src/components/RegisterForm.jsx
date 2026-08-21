@@ -5,6 +5,7 @@ import { tickets } from '../data/packages'
 import { criteria } from '../data/criteria'
 import { postToAppsScript } from '../lib/appsScript'
 import { useFlashSale } from '../lib/useFlashSale'
+import { useEarlyBird } from '../lib/useEarlyBird'
 import { useLanguage } from '../context/LanguageContext'
 
 // `value` giữ nguyên tiếng Việt ở cả 2 ngôn ngữ — đây là dữ liệu ghi vào Google Sheet,
@@ -22,12 +23,12 @@ const industryOptions = [
   {
     value: 'Dệt May, Da Giày, Thủ công mỹ nghệ',
     label:
-      'Nhóm Hàng xuất khẩu truyền thống: Dệt May, Da Giày, Thủ công mỹ nghệ,... / Traditional Export Goods Group: Textiles, Leather Footwear, Handicrafts',
+      'Nhóm Hàng xuất khẩu truyền thống: Dệt May, Da Giày, Thủ công mỹ nghệ,... / Traditional Export Goods Group: Textiles, Leather Footwear, Handicrafts',
   },
   {
-    value: 'Dịch vụ hỗ trợ xuất khẩu (Logistics, bảo hiểm, tài chính)',
+    value: 'Dịch vụ hỗ trợ xuất khẩu (Logistics, bảo hiểm, tài chính)',
     label:
-      'Nhóm Ngành Sản phẩm, Dịch vụ hỗ trợ xuất khẩu (Logistic, bảo hiểm, tài chính,...) / Supporting Industries and Services for Export (Logistics, Insurance, Finance, etc)',
+      'Nhóm Ngành Sản phẩm, Dịch vụ hỗ trợ xuất khẩu (Logistic, bảo hiểm, tài chính,...) / Supporting Industries and Services for Export (Logistics, Insurance, Finance, etc)',
   },
   { value: 'Khác', label: 'Khác / Other' },
 ]
@@ -50,13 +51,16 @@ const SPONSOR_VALUE = 'Quan tâm trở thành Nhà Tài trợ'
 const SPONSOR_LABEL = { vi: SPONSOR_VALUE, en: 'I am interested in becoming a Sponsor' }
 const MAX_TICKET_SELECTION = 2
 
-function buildTicketOptions(flashActive, lang) {
-  const options = tickets.map((t) => ({
-    value: t.code,
-    name: `${t.code} — ${lang === 'en' ? t.tagEn : t.tag} — ${lang === 'en' ? 'from' : 'từ'} ${flashActive ? t.flashSale : t.earlyBird}đ`,
-    duration: lang === 'en' ? `Only ${t.slots} slots` : `Chỉ ${t.slots} suất`,
-  }))
-  options.push({ value: SPONSOR_VALUE, name: SPONSOR_LABEL[lang], duration: null })
+function buildTicketOptions(flashActive, earlyBirdActive, lang) {
+  const options = tickets
+    .filter((t) => !t.soldOut)
+    .map((t) => ({
+      value: t.code,
+      name: `${t.code} — ${lang === 'en' ? t.tagEn : t.tag} — ${lang === 'en' ? 'from' : 'từ'} ${
+        flashActive ? t.flashSale : earlyBirdActive ? t.earlyBird : t.standard
+      }đ`,
+    }))
+  options.push({ value: SPONSOR_VALUE, name: SPONSOR_LABEL[lang] })
   return options
 }
 
@@ -79,7 +83,7 @@ const copy = {
     taxCode: 'Mã số thuế doanh nghiệp *',
     website: 'Website / Facebook *',
     address: 'Địa chỉ trụ sở chính *',
-    exportMarkets: 'Đã xuất khẩu đến thị trường VD: Mỹ, EU, Nhật Bản, Hàn Quốc... *',
+    exportMarkets: 'Đã xuất khẩu đến thị trường VD: Mỹ, EU, Nhật Bản, Hàn Quốc... *',
     step2: 'Thông tin người đại diện',
     contactName: 'Họ & Tên *',
     jobTitle: 'Chức vụ *',
@@ -160,12 +164,12 @@ function StepSection({ n, icon: Icon, title, isLast, children }) {
         </span>
         {!isLast && <span className="w-px flex-1 bg-rose-100 my-2" />}
       </div>
-      <div className={`flex-1 min-w-0 ${isLast ? '' : 'pb-8'}`}>
-        <div className="flex items-center gap-2 mb-4">
+      <div className={`flex-1 min-w-0 ${isLast ? '' : 'pb-6'}`}>
+        <div className="flex items-center gap-2 mb-3">
           <Icon size={16} className="text-primary shrink-0" />
           <h4 className="font-semibold text-dark text-sm uppercase tracking-wide">{title}</h4>
         </div>
-        <div className="space-y-4">{children}</div>
+        <div className="space-y-3">{children}</div>
       </div>
     </div>
   )
@@ -173,14 +177,14 @@ function StepSection({ n, icon: Icon, title, isLast, children }) {
 
 function CriteriaPanel({ lang, c }) {
   return (
-    <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-rose-50 panel-depth p-7 md:p-8">
-      <p className="label-tag mb-3">{c.criteriaTag}</p>
+    <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-rose-50 panel-depth p-6 md:p-7">
+      <p className="label-tag mb-2">{c.criteriaTag}</p>
       <h3 className="font-semibold text-dark text-xl md:text-2xl leading-snug mb-2">{c.criteriaTitle}</h3>
-      <p className="text-muted text-sm leading-relaxed mb-2">{c.criteriaDesc}</p>
+      <p className="text-muted text-sm leading-relaxed mb-1">{c.criteriaDesc}</p>
 
       <div className="divide-y divide-rose-50">
         {criteria.map((cr) => (
-          <div key={cr.title} className="flex items-start gap-4 py-5">
+          <div key={cr.title} className="flex items-start gap-4 py-4">
             <div className="w-11 h-11 rounded-xl bg-gradient-hawee flex items-center justify-center shrink-0">
               <cr.icon className="text-white" size={19} />
             </div>
@@ -205,9 +209,10 @@ export default function RegisterForm() {
   const [ticketError, setTicketError] = useState(false)
   const ticketSectionRef = useRef(null)
   const { active: flashActive } = useFlashSale()
+  const earlyBirdActive = useEarlyBird()
   const { lang } = useLanguage()
   const c = copy[lang]
-  const ticketOptions = buildTicketOptions(flashActive, lang)
+  const ticketOptions = buildTicketOptions(flashActive, earlyBirdActive, lang)
 
   function toggleOption(value) {
     setTicketError(false)
@@ -259,27 +264,27 @@ export default function RegisterForm() {
   }
 
   return (
-    <section id="dang-ky" className="py-12 md:py-16">
+    <section id="dang-ky" className="py-10 md:py-12">
       <div className="container-custom max-w-6xl">
-        <FadeUp className="text-center max-w-2xl mx-auto mb-10">
-          <p className="label-tag mb-3">{c.tag}</p>
-          <h2 className="section-title text-2xl md:text-4xl whitespace-normal text-balance">{c.title}</h2>
+        <FadeUp className="text-center max-w-2xl mx-auto mb-7">
+          <p className="label-tag mb-2">{c.tag}</p>
+          <h2 className="section-title text-2xl md:text-4xl mb-0 whitespace-normal text-balance">{c.title}</h2>
         </FadeUp>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-6 items-start">
         <FadeUp className="lg:col-span-5 order-2 lg:order-1">
           <CriteriaPanel lang={lang} c={c} />
         </FadeUp>
 
         <FadeUp className="lg:col-span-7 order-1 lg:order-2">
           {sent ? (
-            <div className="text-center py-16 bg-white rounded-2xl border border-rose-50 panel-depth">
+            <div className="text-center py-12 bg-white rounded-2xl border border-rose-50 panel-depth">
               <div className="text-4xl mb-4">✨</div>
               <h3 className="font-semibold text-dark mb-2">{c.sentTitle}</h3>
               <p className="text-muted text-sm">{c.sentDesc}</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-rose-50 panel-depth p-6 md:p-8">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-rose-50 panel-depth p-5 md:p-6">
               <input type="hidden" name="form_source" value="Đăng ký gian hàng" />
 
               <StepSection n={1} icon={Building2} title={c.step1}>
@@ -369,11 +374,6 @@ export default function RegisterForm() {
                             {checked && <Check size={11} className="text-white" />}
                           </span>
                           <span className="font-semibold text-dark text-sm">{t.name}</span>
-                          {t.duration && (
-                            <span className="text-[12px] text-primary font-medium bg-primary/10 rounded-full px-2 py-0.5">
-                              {t.duration}
-                            </span>
-                          )}
                         </div>
                       </label>
                     )
@@ -403,7 +403,7 @@ export default function RegisterForm() {
               </StepSection>
 
               <StepSection n={4} icon={CheckCircle2} title={c.step4} isLast>
-                <div className="rounded-xl bg-rose-50/60 border border-rose-100 p-5 space-y-4">
+                <div className="rounded-xl bg-rose-50/60 border border-rose-100 p-4 space-y-3">
                   <p className="text-muted text-xs leading-relaxed">{c.confirmNote}</p>
 
                   <label className="flex items-start gap-2 text-xs text-muted">

@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext'
 
 const defaultLabel = {
   vi: { gov: 'Hội Chợ Hàng Việt Nam Tiêu Biểu Xuất Khẩu 2026', hawee: 'HAWEE Pavillon' },
-  en: { gov: 'Vietnam Typical Export Products Fair 2026', hawee: 'HAWEE Pavillon' },
+  en: { gov: "HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR", hawee: 'HAWEE Pavillon' },
 }
 
 // Nhãn phân biệt nguồn nội dung: "gov" = thuộc Hội Chợ Hàng Việt Nam Tiêu Biểu

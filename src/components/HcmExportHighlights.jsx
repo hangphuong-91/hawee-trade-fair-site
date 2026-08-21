@@ -11,9 +11,9 @@ const copy = {
     resultsTitle: 'Kết Quả Nổi Bật Từ Năm Trước',
   },
   en: {
-    kicker: 'Vietnam Typical Export Products Fair 2026',
+    kicker: "HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR",
     title: 'Highlights of HCMC Export 2026',
-    resultsKicker: 'Vietnam Typical Export Products Fair',
+    resultsKicker: "VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR",
     resultsTitle: 'Results From The Previous Edition',
   },
 }

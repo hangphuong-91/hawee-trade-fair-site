@@ -25,7 +25,7 @@ const logos = [
 
 const copy = {
   vi: 'Đơn vị chỉ đạo · tổ chức · đồng hành — Hội Chợ Hàng Việt Nam Tiêu Biểu Xuất Khẩu 2026',
-  en: 'Directed by · Organized by · Co-hosted by — Vietnam Typical Export Products Fair 2026',
+  en: "Directed by · Organized by · Co-hosted by — HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR",
 }
 
 export default function EventTicker() {

@@ -5,30 +5,30 @@ import { useLanguage } from '../context/LanguageContext'
 
 const copy = {
   vi: {
-    bannerAlt: 'Hội chợ Hàng Việt Nam tiêu biểu xuất khẩu năm 2026',
+    bannerAlt: 'Hội chợ Hàng Việt Nam tiêu biểu xuất khẩu năm 2026',
     heading: (
       <>
         HAWEE International Trade Fair{' '}
         <span className="text-primary">thuộc khuôn khổ</span>{' '}
         <span className="block sm:inline text-[14px] sm:text-lg md:text-2xl">
-          "Hội chợ hàng Việt Nam tiêu biểu xuất khẩu 2026"
+          "Hội chợ hàng Việt Nam tiêu biểu xuất khẩu 2026"
         </span>
       </>
     ),
-    sub: 'Nơi tia sáng đầu tiên của một hành trình xuất khẩu mới bắt đầu — do Sở Công Thương TP.HCM chủ trì.',
+    sub: 'Nơi tia sáng đầu tiên của một hành trình xuất khẩu mới bắt đầu — do Sở Công Thương TP.HCM chủ trì.',
     date: '22 – 24/10/2026',
     location: 'WTC Expo, Bình Dương',
     ctaPrimary: 'Giữ chỗ gian hàng ngay',
     ctaSecondary: 'Khám phá doanh nghiệp tham gia',
   },
   en: {
-    bannerAlt: 'Vietnam Typical Export Products Fair 2026',
+    bannerAlt: "HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR",
     heading: (
       <>
         HAWEE International Trade Fair{' '}
         <span className="text-primary">held within</span>{' '}
         <span className="block sm:inline text-[14px] sm:text-lg md:text-2xl">
-          the "Vietnam Typical Export Products Fair 2026"
+          the "HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR"
         </span>
       </>
     ),

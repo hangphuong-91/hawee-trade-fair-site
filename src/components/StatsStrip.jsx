@@ -12,7 +12,7 @@ const copy = {
       { label: 'Lượt khách', value: '30.000', suffix: '+' },
     ],
     stats: [
-      { icon: Building2, value: 700, suffix: '+', label: 'doanh nghiệp xuất khẩu tiêu biểu' },
+      { icon: Building2, value: 700, suffix: '+', label: 'doanh nghiệp xuất khẩu tiêu biểu' },
       { icon: Store, value: 750, suffix: '', label: 'gian hàng đa dạng lĩnh vực' },
       { icon: Globe2, value: 10, suffix: '+', label: 'thị trường trọng điểm có buyer tham gia' },
       { icon: CalendarDays, value: 3, suffix: '', label: 'ngày tấp nập giao thương' },
@@ -50,7 +50,7 @@ const copy = {
       { icon: Handshake, value: 500, suffix: '', label: 'B2B meetings' },
     ],
     tag: 'By The Numbers',
-    title: 'HAWEE Pavillon Amplifies the Scale of the Vietnam Typical Export Products Fair 2026',
+    title: "HAWEE Pavillon Amplifies the Scale of the HO CHI MINH CITY EXPORT 2026 VIETNAM'S OUTSTANDING EXPORT PRODUCTS FAIR",
     intro: (
       <>
         <span className="text-white font-bold">400+ international buyers</span> from the US, EU, Japan, Korea,

@@ -19,8 +19,8 @@ const copy = {
     pendingBadge: 'Đang cập nhật',
     filterAll: 'Tất cả lĩnh vực',
     noResult: 'Không có doanh nghiệp nào trong lĩnh vực này.',
-    joinClosing: 'Cùng toả sáng trong danh sách này — giữ chỗ gian hàng của bạn.',
-    joinCta: 'Cùng góp mặt tại HAWEE Pavillon',
+    joinClosing: 'Xem đầy đủ năng lực, sản phẩm và đầu mối liên hệ của từng doanh nghiệp trước khi hội chợ khai mạc.',
+    joinCta: 'Xem Hồ Sơ Doanh Nghiệp',
     emptyTitle: 'Đang cập nhật danh sách doanh nghiệp',
     emptyDesc: 'Gian hàng HAWEE Pavillon sẽ sớm được lấp đầy — hãy là một trong những doanh nghiệp đầu tiên góp mặt.',
     emptyCta: 'Đăng ký gian hàng ngay',
@@ -38,8 +38,8 @@ const copy = {
     pendingBadge: 'Pending',
     filterAll: 'All industries',
     noResult: 'No exhibitors in this industry.',
-    joinClosing: 'Shine alongside them — reserve your booth today.',
-    joinCta: 'Join HAWEE Pavillon',
+    joinClosing: 'Browse each exhibitor\'s capabilities, products and contact details before the fair opens.',
+    joinCta: 'View Business Profiles',
     emptyTitle: 'Exhibitor List Coming Soon',
     emptyDesc: 'HAWEE Pavillon booths will fill up fast — be one of the first businesses on board.',
     emptyCta: 'Reserve Your Booth Now',
@@ -227,7 +227,7 @@ export default function Exhibitors() {
 
             <FadeUp delay={0.15} className="text-center mt-10">
               <p className="text-muted text-sm mb-4">{c.joinClosing}</p>
-              <a href="#dang-ky" className="btn-primary">
+              <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
                 {c.joinCta}
               </a>
             </FadeUp>

@@ -12,7 +12,7 @@ const copy = {
       { href: '#tai-tro', label: 'Đơn vị Tài trợ' },
       { href: '#dang-ky', label: 'Đăng ký' },
     ],
-    cta: 'Giữ chỗ gian hàng',
+    cta: 'Xem Hồ Sơ Doanh Nghiệp',
     menuLabel: 'Mở menu',
   },
   en: {
@@ -24,7 +24,7 @@ const copy = {
       { href: '#tai-tro', label: 'Sponsors' },
       { href: '#dang-ky', label: 'Register' },
     ],
-    cta: 'Reserve a Booth',
+    cta: 'View Business Profiles',
     menuLabel: 'Open menu',
   },
 }
@@ -83,7 +83,7 @@ export default function Header() {
             <Globe size={14} />
             {lang === 'vi' ? 'EN' : 'VI'}
           </button>
-          <a href="#dang-ky" className="btn-primary text-sm py-2.5 px-5">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-primary text-sm py-2.5 px-5">
             {c.cta}
           </a>
         </nav>
@@ -121,7 +121,11 @@ export default function Header() {
               {l.label}
             </a>
           ))}
-          <a href="#dang-ky" onClick={() => setOpen(false)} className="btn-primary block text-center text-sm py-2.5">
+          <a
+            href="/ho-so-doanh-nghiep.html"
+            onClick={() => setOpen(false)}
+            className="btn-primary block text-center text-sm py-2.5"
+          >
             {c.cta}
           </a>
         </div>

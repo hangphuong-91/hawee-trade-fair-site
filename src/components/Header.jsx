@@ -83,7 +83,7 @@ export default function Header() {
             <Globe size={14} />
             {lang === 'vi' ? 'EN' : 'VI'}
           </button>
-          <a href="/ho-so-doanh-nghiep.html" className="btn-primary text-sm py-2.5 px-5">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-primary text-sm py-2.5 px-5 whitespace-nowrap">
             {c.cta}
           </a>
         </nav>
@@ -124,7 +124,7 @@ export default function Header() {
           <a
             href="/ho-so-doanh-nghiep.html"
             onClick={() => setOpen(false)}
-            className="btn-primary block text-center text-sm py-2.5"
+            className="btn-primary block text-center text-sm py-2.5 whitespace-nowrap"
           >
             {c.cta}
           </a>

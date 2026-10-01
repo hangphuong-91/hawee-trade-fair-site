@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v11-2026-07-24-secrets-in-script-properties';
+var CODE_VERSION = 'v12-2026-09-04-antispam-hardening';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -28,6 +28,14 @@ var RECAPTCHA_MIN_SCORE = 0.5;
 // ghi vào bị lệch cột so với tiêu đề hiển thị. Tab mới đảm bảo header luôn khớp 100% với dữ liệu.
 var SHEET_GIAN_HANG = 'Đăng ký gian hàng (v2)';
 var SHEET_TAI_TRO = 'Đăng ký tài trợ';
+var SHEET_SPAM_LOG = 'Đăng ký bị chặn (spam)';
+
+// Tên field honeypot ẩn — input này KHÔNG hiển thị với người dùng thật (CSS ẩn ngoài màn hình,
+// không phải display:none để qua mặt bot đơn giản chỉ check computed style), chỉ bot điền form
+// mù (không quan tâm CSS) mới điền vào. Có giá trị = chặn ngay, không cần gọi reCAPTCHA.
+var HONEYPOT_FIELD = 'company_website_2';
+
+var HEADERS_SPAM_LOG = ['Thời gian', 'Form', 'Lý do chặn', 'Dữ liệu (JSON)'];
 
 var HEADERS_GIAN_HANG = [
   'Thời gian',
@@ -77,11 +85,16 @@ function forceText(value) {
 }
 
 // Verify token với Google trước khi ghi sheet. Trả về chi tiết (không chỉ true/false) để
-// doPost() quyết định: THIẾU token hẳn (gọi thẳng URL bằng curl/Postman, không qua form thật)
-// thì chặn cứng — đúng mục đích chống spam ban đầu. Nhưng CÓ token mà verify không đạt (điểm thấp,
-// hoặc lỗi mạng gọi Google từ phía Apps Script) thì KHÔNG chặn — vẫn ghi vào sheet và đánh dấu
-// "cần xem lại" ở cột riêng, vì với form đăng ký kinh doanh, mất 1 lead thật đắt hơn nhiều so với
-// việc thỉnh thoảng có 1 dòng rác cần xoá tay.
+// doPost() quyết định. Phân biệt rõ 2 loại "không đạt":
+//   1. Google ĐÃ TRẢ LỜI RÕ RÀNG đây là bot/điểm thấp (success:false hoặc score < ngưỡng) →
+//      CHẶN CỨNG (blocking:true). Đây chính là mục đích của reCAPTCHA v3 — nếu không chặn ở
+//      bước này thì cả hệ thống coi như không có tác dụng chống spam nào (đã xảy ra thực tế:
+//      3 lượt đăng ký bot 28-30/8/2026 lọt qua vì bước xác minh bị lỗi quyền UrlFetchApp).
+//   2. Apps Script KHÔNG GỌI ĐƯỢC Google (lỗi mạng/config, không phải Google từ chối) → KHÔNG
+//      chặn (blocking:false), vẫn ghi vào sheet + đánh dấu "cần xem lại", vì đây là lỗi hạ tầng
+//      tạm thời phía mình, không phải tín hiệu bot — không nên đánh đổi mất lead thật vì lỗi này.
+// THIẾU token hẳn (gọi thẳng URL bằng curl/Postman, không qua form thật) cũng chặn cứng — đúng
+// mục đích chống spam ban đầu.
 function verifyRecaptcha(token) {
   if (!token) return { verified: false, blocking: true, note: 'Không có reCAPTCHA token — có thể gọi thẳng vào URL, không qua form web' };
   if (!RECAPTCHA_SECRET_KEY) {
@@ -100,11 +113,29 @@ function verifyRecaptcha(token) {
     var codes = result['error-codes'] ? result['error-codes'].join(',') : '';
     return {
       verified: false,
-      blocking: false,
-      note: 'reCAPTCHA điểm thấp/không xác minh được (score=' + score + (codes ? ', ' + codes : '') + ') — vui lòng kiểm tra thủ công',
+      blocking: true,
+      note: 'reCAPTCHA từ chối (score=' + score + (codes ? ', ' + codes : '') + ')',
     };
   } catch (err) {
     return { verified: false, blocking: false, note: 'Không gọi được Google để xác minh reCAPTCHA (' + err.toString() + ') — vui lòng kiểm tra thủ công' };
+  }
+}
+
+// Ghi lại các lượt bị chặn (honeypot hoặc reCAPTCHA từ chối rõ ràng) vào sheet riêng thay vì
+// bỏ hẳn — để vẫn xem lại thủ công được nếu nghi ngờ có lead thật bị chặn nhầm, mà không làm
+// bẩn 2 sheet chính (đặc biệt tránh ghi domain/link rác từ bot vào sheet chính, vốn là nguyên
+// nhân Google Drive/Gmail có thể gắn cờ "file đáng ngờ" cho cả file Sheet).
+function logRejected(data, reason) {
+  try {
+    var sheet = getOrCreateSheet(SHEET_SPAM_LOG, HEADERS_SPAM_LOG);
+    var safeData = {};
+    for (var key in data) {
+      if (key === 'recaptcha_token') continue;
+      safeData[key] = data[key];
+    }
+    sheet.appendRow([new Date(), sanitizeCell(data.form_source || ''), sanitizeCell(reason), sanitizeCell(JSON.stringify(safeData))]);
+  } catch (err) {
+    // Không để lỗi ghi log làm hỏng luồng chính — bỏ qua, response error vẫn trả về bình thường.
   }
 }
 
@@ -120,6 +151,7 @@ function fixHeaders() {
   [
     [SHEET_GIAN_HANG, HEADERS_GIAN_HANG],
     [SHEET_TAI_TRO, HEADERS_TAI_TRO],
+    [SHEET_SPAM_LOG, HEADERS_SPAM_LOG],
   ].forEach(function (pair) {
     var sheet = ss.getSheetByName(pair[0]) || ss.insertSheet(pair[0]);
     sheet.getRange(1, 1, 1, pair[1].length).setValues([pair[1]]);
@@ -143,10 +175,17 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (data[HONEYPOT_FIELD]) {
+      logRejected(data, 'honeypot');
+      result = { result: 'error', error: 'rejected' };
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var recaptcha = verifyRecaptcha(data.recaptcha_token);
 
     if (recaptcha.blocking) {
-      result = { result: 'error', error: 'recaptcha_missing' };
+      logRejected(data, recaptcha.note);
+      result = { result: 'error', error: 'recaptcha_failed' };
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
     }
 

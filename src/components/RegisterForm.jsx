@@ -230,10 +230,18 @@ export default function RegisterForm() {
       ticketSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
-    setLoading(true)
-    setError(false)
     const form = e.target
     const data = new FormData(form)
+    // Bot điền mù mọi field kể cả honeypot ẩn — chặn ngay tại đây, TRƯỚC khi gọi Formspree/Apps
+    // Script, để không sinh email thông báo rác qua Formspree (Code.gs chỉ chặn được ghi vào Sheet,
+    // không chặn được request Formspree vì đó là 1 API riêng, không biết gì về honeypot này).
+    // Giả vờ thành công để bot không thử lại cách khác — người dùng thật không bao giờ đụng field này.
+    if (data.get('company_website_2')) {
+      setSent(true)
+      return
+    }
+    setLoading(true)
+    setError(false)
     const formspreeId = import.meta.env.VITE_FORMSPREE_ID
     const appsScriptUrl = import.meta.env.VITE_APPS_SCRIPT_URL
 
@@ -286,6 +294,16 @@ export default function RegisterForm() {
           ) : (
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-rose-50 panel-depth p-5 md:p-6">
               <input type="hidden" name="form_source" value="Đăng ký gian hàng" />
+              {/* Honeypot chống bot — ẩn khỏi người dùng thật (không dùng display:none để né bot
+                  đơn giản chỉ check computed style), field name khớp HONEYPOT_FIELD trong Code.gs. */}
+              <input
+                type="text"
+                name="company_website_2"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+              />
 
               <StepSection n={1} icon={Building2} title={c.step1}>
                 <input name="company" required placeholder={c.companyName} className={fieldClass()} />

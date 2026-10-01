@@ -68,10 +68,15 @@ export default function SponsorCTA() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setError(false)
     const form = e.target
     const data = new FormData(form)
+    // Chặn bot ngay tại đây, trước khi gọi Formspree/Apps Script — xem ghi chú trong RegisterForm.jsx.
+    if (data.get('company_website_2')) {
+      setSent(true)
+      return
+    }
+    setLoading(true)
+    setError(false)
     const formspreeId = import.meta.env.VITE_FORMSPREE_ID
     const appsScriptUrl = import.meta.env.VITE_APPS_SCRIPT_URL
 
@@ -118,6 +123,15 @@ export default function SponsorCTA() {
 
             <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-3">
               <input type="hidden" name="form_source" value="Đăng ký tài trợ" />
+              {/* Honeypot chống bot — xem RegisterForm.jsx / Code.gs (field name khớp HONEYPOT_FIELD). */}
+              <input
+                type="text"
+                name="company_website_2"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+              />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input name="contact_name" required placeholder={c.name} className={fieldClass()} />
                 <input name="company" required placeholder={c.company} className={fieldClass()} />

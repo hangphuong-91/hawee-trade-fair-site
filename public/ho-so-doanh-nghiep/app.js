@@ -12,13 +12,13 @@
 
     var bookEl = document.getElementById("book");
     var pageFlip = new St.PageFlip(bookEl, {
-      width: 420,
-      height: 594,
+      width: 520,
+      height: 735,
       size: "stretch",
-      minWidth: 260,
-      maxWidth: 480,
-      minHeight: 368,
-      maxHeight: 680,
+      minWidth: 300,
+      maxWidth: 620,
+      minHeight: 424,
+      maxHeight: 876,
       maxShadowOpacity: 0.5,
       showCover: true,
       usePortrait: true,

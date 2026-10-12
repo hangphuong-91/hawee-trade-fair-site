@@ -3,16 +3,14 @@ import { useLanguage } from '../context/LanguageContext'
 
 const copy = {
   vi: {
-    title: 'Ngôi Sao Mai Không Chờ Đợi Ai',
-    body: 'Ngôi sao mai chỉ xuất hiện một lần mỗi ngày — cơ hội Early Bird của HAWEE International Trade Fair 2026 cũng vậy. Giữ chỗ hôm nay để cùng hàng trăm doanh nghiệp Việt bước vào hành trình xuất khẩu mới tại WTC Expo.',
-    ctaPrimary: 'Giữ chỗ Early Bird ngay',
-    ctaSecondary: 'Xem bảng giá & quyền lợi',
+    title: 'Ngôi Sao Mai Đã Toả Sáng',
+    body: 'Hơn 80 doanh nghiệp Việt đã sẵn sàng cho hành trình xuất khẩu mới tại HAWEE International Trade Fair 2026, 22–24/10 tại WTC Expo. Xem hồ sơ từng doanh nghiệp trước khi hội chợ khai mạc.',
+    ctaPrimary: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
-    title: 'The Morning Star Waits For No One',
-    body: 'The morning star appears only once a day — so does the Early Bird opportunity at HAWEE International Trade Fair 2026. Reserve your spot today and join hundreds of Vietnamese businesses on a new export journey at WTC Expo.',
-    ctaPrimary: 'Claim Early Bird Now',
-    ctaSecondary: 'View Pricing & Benefits',
+    title: 'The Morning Star Has Risen',
+    body: 'More than 80 Vietnamese businesses are ready for a new export journey at HAWEE International Trade Fair 2026, Oct 22–24 at WTC Expo. Browse each business profile before the fair opens.',
+    ctaPrimary: 'View Business Profiles',
   },
 }
 
@@ -30,11 +28,8 @@ export default function FinalCTA() {
           </h2>
           <p className="text-white/85 max-w-xl mx-auto mb-8">{c.body}</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <a href="#dang-ky" className="btn-white">
+            <a href="/ho-so-doanh-nghiep.html" className="btn-white">
               {c.ctaPrimary}
-            </a>
-            <a href="#goi-tham-gia" className="btn-ghost-white">
-              {c.ctaSecondary}
             </a>
           </div>
         </FadeUp>

@@ -18,7 +18,7 @@ const copy = {
     sub: 'Nơi tia sáng đầu tiên của một hành trình xuất khẩu mới bắt đầu — do Sở Công Thương TP.HCM chủ trì.',
     date: '22 – 24/10/2026',
     location: 'WTC Expo, Bình Dương',
-    ctaPrimary: 'Giữ chỗ gian hàng ngay',
+    ctaPrimary: 'Xem Hồ Sơ Doanh Nghiệp',
     ctaSecondary: 'Khám phá doanh nghiệp tham gia',
   },
   en: {
@@ -35,7 +35,7 @@ const copy = {
     sub: 'Where the first light of a new export journey begins — hosted by the HCMC Department of Industry and Trade.',
     date: 'Oct 22 – 24, 2026',
     location: 'WTC Expo, Binh Duong',
-    ctaPrimary: 'Reserve Your Booth Now',
+    ctaPrimary: 'View Business Profiles',
     ctaSecondary: 'Meet Our Exhibitors',
   },
 }
@@ -82,7 +82,7 @@ export default function EventIntro() {
 
         <FadeUp delay={0.15}>
           <div className="flex flex-wrap gap-3 justify-center mt-5">
-            <a href="#dang-ky" className="btn-primary">
+            <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
               {c.ctaPrimary}
             </a>
             <a href="#doanh-nghiep" className="btn-outline">

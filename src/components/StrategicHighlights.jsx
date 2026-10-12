@@ -9,14 +9,14 @@ const copy = {
     title: 'Điểm Nhấn Tại HAWEE Pavillon',
     sub: 'Pavillon tôn vinh và nâng cao năng lực cạnh tranh của doanh nghiệp phụ nữ, hướng đến phát triển bền vững và hội nhập quốc tế.',
     banner: 'Hoạt động điểm nhấn xuyên suốt hành trình',
-    cta: 'Giữ chỗ gian hàng ngay',
+    cta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     tag: 'HAWEE International Trade Fair',
     title: 'Highlights At HAWEE Pavillon',
     sub: 'A pavillon that celebrates and strengthens the competitiveness of women-led businesses, driving sustainable growth and international integration.',
     banner: 'Signature Activities Throughout The Journey',
-    cta: 'Reserve Your Booth Now',
+    cta: 'View Business Profiles',
   },
 }
 
@@ -83,7 +83,7 @@ export default function StrategicHighlights() {
         </FadeUp>
 
         <FadeUp delay={0.15} className="text-center mt-10">
-          <a href="#dang-ky" className="btn-primary">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
             {c.cta}
           </a>
         </FadeUp>

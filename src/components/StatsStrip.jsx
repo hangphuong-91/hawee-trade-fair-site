@@ -34,7 +34,7 @@ const copy = {
         ))}
       </>
     ),
-    cta: 'Giữ chỗ gian hàng ngay',
+    cta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     headline: [
@@ -64,7 +64,7 @@ const copy = {
         ))}
       </>
     ),
-    cta: 'Reserve Your Booth Now',
+    cta: 'View Business Profiles',
   },
 }
 
@@ -113,7 +113,7 @@ export default function StatsStrip() {
         </div>
 
         <FadeUp delay={0.2} className="text-center mt-10">
-          <a href="#dang-ky" className="btn-white">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-white">
             {c.cta}
           </a>
         </FadeUp>

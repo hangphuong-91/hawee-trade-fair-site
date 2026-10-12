@@ -23,7 +23,7 @@ const copy = {
     joinCta: 'Xem Hồ Sơ Doanh Nghiệp',
     emptyTitle: 'Đang cập nhật danh sách doanh nghiệp',
     emptyDesc: 'Gian hàng HAWEE Pavillon sẽ sớm được lấp đầy — hãy là một trong những doanh nghiệp đầu tiên góp mặt.',
-    emptyCta: 'Đăng ký gian hàng ngay',
+    emptyCta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     tag: 'Exhibitors',
@@ -42,7 +42,7 @@ const copy = {
     joinCta: 'View Business Profiles',
     emptyTitle: 'Exhibitor List Coming Soon',
     emptyDesc: 'HAWEE Pavillon booths will fill up fast — be one of the first businesses on board.',
-    emptyCta: 'Reserve Your Booth Now',
+    emptyCta: 'View Business Profiles',
   },
 }
 
@@ -240,7 +240,7 @@ export default function Exhibitors() {
               </div>
               <p className="text-dark font-semibold mb-2">{c.emptyTitle}</p>
               <p className="text-muted text-sm leading-relaxed mb-6">{c.emptyDesc}</p>
-              <a href="#dang-ky" className="btn-primary">
+              <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
                 {c.emptyCta}
               </a>
             </div>

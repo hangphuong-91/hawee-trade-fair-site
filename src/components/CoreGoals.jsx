@@ -37,7 +37,7 @@ const copy = {
     tag: 'Mục tiêu cốt lõi',
     title: 'Vì Sao Đây Là Chương Trình Doanh Nghiệp Không Thể Bỏ Lỡ Trong Quý 3/2026',
     closing: 'Sẵn sàng để doanh nghiệp bạn là một phần của hành trình này?',
-    cta: 'Bắt đầu hành trình cùng HAWEE',
+    cta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     heroGoal: {
@@ -73,7 +73,7 @@ const copy = {
     tag: 'Core Objectives',
     title: 'Why This Is The Program Businesses Cannot Miss In Q3 2026',
     closing: 'Ready for your business to be part of this journey?',
-    cta: 'Start Your Journey With HAWEE',
+    cta: 'View Business Profiles',
   },
 }
 
@@ -149,7 +149,7 @@ export default function CoreGoals() {
 
         <FadeUp delay={0.15} className="text-center mt-10">
           <p className="text-muted text-sm mb-4">{c.closing}</p>
-          <a href="#dang-ky" className="btn-primary">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
             {c.cta}
           </a>
         </FadeUp>

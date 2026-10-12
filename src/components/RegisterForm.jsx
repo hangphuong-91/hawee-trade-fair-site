@@ -109,6 +109,10 @@ const copy = {
     and: 'và',
     termsOfService: 'Điều khoản dịch vụ',
     ofGoogle: 'của Google.',
+    closedTitle: 'Đăng Ký Gian Hàng Đã Đóng',
+    closedBody:
+      'Cảm ơn hơn 80 doanh nghiệp đã đăng ký tham gia HAWEE International Trade Fair 2026! Danh sách gian hàng hiện đã đầy. Mời anh/chị xem hồ sơ năng lực, sản phẩm và đầu mối liên hệ của từng doanh nghiệp đã tham gia.',
+    closedCta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     tag: 'Registration',
@@ -150,8 +154,16 @@ const copy = {
     and: 'and',
     termsOfService: 'Terms of Service',
     ofGoogle: 'apply.',
+    closedTitle: 'Booth Registration Is Now Closed',
+    closedBody:
+      "Thank you to the 80+ businesses who registered for HAWEE International Trade Fair 2026! All booths are now filled. Browse each exhibitor's profile — capabilities, products and contact details.",
+    closedCta: 'View Business Profiles',
   },
 }
+
+// Mỗi năm hội chợ có 1 đợt đăng ký — đóng form khi hết chỗ/hết hạn thay vì xoá hẳn component,
+// để dễ bật lại đúng cấu trúc form này cho kỳ hội chợ sau. Đổi thành `true` khi mở lại.
+const REGISTRATION_OPEN = false
 
 // 4 bước phản ánh đúng trình tự thật khi điền form (thông tin → phân loại → chọn vé → xác nhận) —
 // đánh số ở đây có ý nghĩa thật (thứ tự thao tác), không phải trang trí.
@@ -269,6 +281,23 @@ export default function RegisterForm() {
     } else {
       setError(true)
     }
+  }
+
+  if (!REGISTRATION_OPEN) {
+    return (
+      <section id="dang-ky" className="py-10 md:py-12">
+        <div className="container-custom max-w-6xl">
+          <FadeUp className="max-w-xl mx-auto text-center bg-white rounded-2xl border border-rose-50 panel-depth p-8 md:p-12">
+            <div className="text-4xl mb-4">🌅</div>
+            <h2 className="font-semibold text-dark text-xl md:text-2xl mb-3">{c.closedTitle}</h2>
+            <p className="text-muted text-sm leading-relaxed mb-8">{c.closedBody}</p>
+            <a href="/ho-so-doanh-nghiep.html" className="btn-primary text-base py-4 px-10 inline-block">
+              {c.closedCta}
+            </a>
+          </FadeUp>
+        </div>
+      </section>
+    )
   }
 
   return (

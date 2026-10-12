@@ -27,7 +27,7 @@ const copy = {
     ],
     stampsUnit: 'dấu',
     closing: 'Cả 2 hoạt động đều dẫn khách trực tiếp đến gian hàng — chỉ áp dụng cho doanh nghiệp đã giữ chỗ tại HAWEE Pavillon.',
-    cta: 'Trải nghiệm tại HAWEE Pavillon',
+    cta: 'Xem Hồ Sơ Doanh Nghiệp',
   },
   en: {
     tag: 'Booth Engagement Activities',
@@ -54,7 +54,7 @@ const copy = {
     stampsUnit: 'stamps',
     closing:
       'Both activities drive visitors directly to your booth — available exclusively to businesses that have reserved a booth at HAWEE Pavillon.',
-    cta: 'Experience HAWEE Pavillon',
+    cta: 'View Business Profiles',
   },
 }
 
@@ -141,7 +141,7 @@ export default function DealBellPassport() {
 
         <FadeUp delay={0.15} className="text-center mt-10">
           <p className="text-muted text-sm mb-4">{c.closing}</p>
-          <a href="#dang-ky" className="btn-primary">
+          <a href="/ho-so-doanh-nghiep.html" className="btn-primary">
             {c.cta}
           </a>
         </FadeUp>

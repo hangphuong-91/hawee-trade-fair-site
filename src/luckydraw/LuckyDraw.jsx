@@ -66,7 +66,7 @@ export default function LuckyDraw() {
         </p>
         <ul className="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-2 text-xs font-semibold">
           <li className="rounded-full border border-[#FEB12E]/60 bg-white/10 px-3 py-1.5 text-[#FEB12E]">100 voucher giảm 50% vé Forum</li>
-          <li className="rounded-full border border-[#FEB12E]/60 bg-white/10 px-3 py-1.5 text-[#FEB12E]">10 vé Forum miễn phí</li>
+          <li className="rounded-full border border-[#FEB12E]/60 bg-white/10 px-3 py-1.5 text-[#FEB12E]">5 vé Forum miễn phí</li>
           <li className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-white/90">Quà tại gian hàng Pavilion</li>
         </ul>
       </header>
@@ -81,7 +81,7 @@ export default function LuckyDraw() {
       )}
 
       {stage === 'result' && result && (
-        <ResultCard prize={result.prize} alreadyPlayed={result.alreadyPlayed} email={email} onAgain={reset} />
+        <ResultCard prize={result.prize} code={result.code} alreadyPlayed={result.alreadyPlayed} email={email} onAgain={reset} />
       )}
     </main>
   )

@@ -43,7 +43,7 @@ function backupToFormspree(fields, status, prize) {
   }).catch(() => {})
 }
 
-// Trả { prize, alreadyPlayed } hoặc ném lỗi với code: 'offline' | 'no_prize_left' | 'invalid_input'.
+// Trả { prize, code, alreadyPlayed } hoặc ném lỗi với code: 'offline' | 'no_prize_left' | 'invalid_input'.
 export async function spin(fields) {
   const url = appsScriptUrl()
   const payload = { ...fields, form_source: 'luckydraw' }
@@ -82,5 +82,5 @@ export async function spin(fields) {
   }
 
   backupToFormspree(fields, json.already_played ? 'replay' : 'ok', json.prize)
-  return { prize: json.prize, alreadyPlayed: !!json.already_played }
+  return { prize: json.prize, code: json.code || '', alreadyPlayed: !!json.already_played }
 }

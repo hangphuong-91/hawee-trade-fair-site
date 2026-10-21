@@ -58,7 +58,8 @@ Trang `https://giaothuongquocte.hawee.vn/luckydraw` dùng **chung Web App URL** 
 
 **Vận hành trong sự kiện:**
 - Tab **"Quay số - Quà"** là bảng cấu hình sống: sửa/thêm dòng là có hiệu lực sau tối đa 60 giây. Cột: Tên quà · Loại (`booth` / `forum50` / `forumfree` / `thanks`) · Nơi nhận · Tồn kho · Trọng số · Bật (TRUE/FALSE).
-- Voucher 50% (tồn kho 100) và vé free (tồn kho 10) là 2 dòng loại `forum50` / `forumfree`. Web **không** hiện mã — ban tổ chức gửi mã ưu đãi qua email theo tab "Quay số - Người chơi".
+- Voucher 50% (tồn kho 100) và vé free (tồn kho 5) là 2 dòng loại `forum50` / `forumfree`. Mã ưu đãi Forum vẫn gửi qua email sau; riêng **mã lượt chơi** (dạng `HW-K7M4Q`, cột "Mã lượt chơi" trong tab Người chơi) hiện trên màn kết quả của mọi lượt để gian hàng chụp lại, đối chiếu người thắng.
+- Quà gian hàng: copy từ danh sách doanh nghiệp đã điền form đăng ký quà vào tab "Quay số - Quà" (loại `booth`, cột Nơi nhận = tên gian hàng).
 - Mỗi email quay 1 lần (quay lại → hiện kết quả cũ); email khác quay được lần mới. Không giới hạn theo SĐT.
 - Tab **"Quay số - Người chơi"**: nhân viên tick cột "Đã nhận" khi trao quà; File → Download → .xlsx để lấy bản Excel.
 - Link QR: `https://giaothuongquocte.hawee.vn/luckydraw?src=<vị-trí>` (vd. `?src=cong`, `?src=pavilion`).

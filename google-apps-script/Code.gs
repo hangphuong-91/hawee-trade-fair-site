@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v13-2026-10-21-luckydraw';
+var CODE_VERSION = 'v14-2026-10-21-luckydraw-code';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -44,8 +44,12 @@ var LD_FORM_SOURCE = 'luckydraw';
 
 var HEADERS_LD_PLAYERS = [
   'Thời gian', 'Họ & Tên', 'Chức vụ', 'Công ty', 'Số điện thoại', 'Email',
-  'Giải', 'Loại giải', 'Nơi nhận', 'Nguồn', 'Đã nhận', 'Ghi chú bảo mật',
+  'Giải', 'Loại giải', 'Nơi nhận', 'Nguồn', 'Đã nhận', 'Ghi chú bảo mật', 'Mã lượt chơi',
 ];
+
+// Mỗi lượt quay có 1 mã riêng (hiện trên màn kết quả) để gian hàng chụp lại, đối chiếu từng người thắng.
+var LD_CODE_COL = 13;
+var LD_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // bỏ I, O, 0, 1 cho dễ đọc
 
 // Tab Quà là bảng cấu hình sống — ban tổ chức sửa trực tiếp trong lúc sự kiện (thêm/tắt giải,
 // đổi tồn kho, đổi trọng số). Loại: booth | forum50 | forumfree | thanks.
@@ -54,7 +58,7 @@ var HEADERS_LD_PRIZES = ['Tên quà', 'Loại', 'Nơi nhận / Gian hàng', 'T�
 // Dữ liệu mẫu — chỉ chèn khi tab Quà vừa được tạo lần đầu. Thay bằng danh sách thật trong Sheet.
 var LD_SAMPLE_PRIZES = [
   ['Voucher giảm 50% vé HAWEE Leaders Forum 2026', 'forum50', 'Mã ưu đãi gửi qua email', 100, 5, true],
-  ['Vé tham dự HAWEE Leaders Forum 2026 (miễn phí)', 'forumfree', 'Mã vé gửi qua email', 10, 1, true],
+  ['Vé tham dự HAWEE Leaders Forum 2026 (miễn phí)', 'forumfree', 'Mã vé gửi qua email', 5, 1, true],
   ['Quà tặng từ gian hàng (cập nhật)', 'booth', 'HAWEE Pavilion', 500, 30, true],
 ];
 
@@ -327,6 +331,16 @@ function ldWeightedPick(pool) {
   return pool[pool.length - 1];
 }
 
+// Sinh mã dạng HW-K7M4Q, kiểm tra không trùng mã đã có (existing: mảng mã đang dùng).
+function ldNewCode(existing) {
+  for (var tries = 0; tries < 50; tries++) {
+    var c = 'HW-';
+    for (var i = 0; i < 5; i++) c += LD_CODE_ALPHABET.charAt(Math.floor(Math.random() * LD_CODE_ALPHABET.length));
+    if (existing.indexOf(c) === -1) return c;
+  }
+  return 'HW-' + Date.now().toString(36).toUpperCase();
+}
+
 function ldValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -345,13 +359,20 @@ function handleLuckyDraw(data, recaptcha) {
   lock.waitLock(20000);
   try {
     var players = getOrCreateSheet(SHEET_LD_PLAYERS, HEADERS_LD_PLAYERS);
+    // Sheet tạo từ bản cũ chưa có cột Mã lượt chơi → bổ sung tiêu đề.
+    if (!players.getRange(1, LD_CODE_COL).getValue()) {
+      players.getRange(1, LD_CODE_COL).setValue('Mã lượt chơi').setFontWeight('bold');
+    }
     var last = players.getLastRow();
+    var usedCodes = [];
     if (last >= 2) {
-      var rows = players.getRange(2, 1, last - 1, HEADERS_LD_PLAYERS.length).getValues();
+      var rows = players.getRange(2, 1, last - 1, LD_CODE_COL).getValues();
       for (var i = 0; i < rows.length; i++) {
+        usedCodes.push(String(rows[i][LD_CODE_COL - 1]));
         if (String(rows[i][5]).trim().toLowerCase() === email) {
           return {
             result: 'success', version: CODE_VERSION, already_played: true,
+            code: String(rows[i][LD_CODE_COL - 1]),
             prize: { name: rows[i][6], type: rows[i][7], place: rows[i][8] },
           };
         }
@@ -369,6 +390,7 @@ function handleLuckyDraw(data, recaptcha) {
     sheet.getRange(won.row, 4).setValue(won.stock - 1);
     CacheService.getScriptCache().remove('ld_wheel');
 
+    var code = ldNewCode(usedCodes);
     var row = [
       new Date(),
       sanitizeCell(name),
@@ -382,12 +404,13 @@ function handleLuckyDraw(data, recaptcha) {
       sanitizeCell(data.src),
       false,
       sanitizeCell(recaptcha.note),
+      code,
     ];
     players.appendRow(row);
     players.getRange(players.getLastRow(), 11).insertCheckboxes();
 
     return {
-      result: 'success', version: CODE_VERSION, already_played: false,
+      result: 'success', version: CODE_VERSION, already_played: false, code: code,
       prize: { name: won.name, type: won.type, place: won.place },
     };
   } finally {

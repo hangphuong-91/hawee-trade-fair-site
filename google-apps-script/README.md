@@ -47,3 +47,19 @@ Tự động tạo 2 sheet, phân loại theo form nào gửi lên (field `form_
   1. `RECAPTCHA_SECRET_KEY` trước đây hardcode thẳng trong `Code.gs` — file này nằm trong git repo của site, rò rỉ tiềm ẩn nếu repo từng có remote công khai. Đã chuyển sang đọc từ **Script Properties** (xem bước 4b ở mục Cài đặt) — bắt buộc set property này thì reCAPTCHA mới hoạt động, nếu thiếu sẽ báo lỗi rõ trong cột "Ghi chú bảo mật" thay vì âm thầm hỏng.
   2. Action bảo trì `fix_headers` trước đây **không xác thực** — vì URL Web App là công khai (nằm trong bundle JS site), bất kỳ ai đoán được tên action đều gọi được (rủi ro thấp vì chỉ ghi đè header, không xoá/lộ dữ liệu, nhưng vẫn là lỗ hổng phân quyền). Đã thêm yêu cầu `admin_key` khớp `ADMIN_SECRET` trong Script Properties — thiếu hoặc sai sẽ bị từ chối với `{"result":"error","error":"unauthorized"}`.
 - **[2026-07-24] reCAPTCHA verify thất bại do thiếu quyền `UrlFetchApp`:** phát hiện lỗi `Bạn không có quyền thực hiện lệnh gọi UrlFetchApp.fetch. Các quyền cần có: .../auth/script.external_request` trong cột "Ghi chú bảo mật" ở mọi dòng — nghĩa là Apps Script deployment hiện tại **chưa từng được cấp quyền gọi mạng ra ngoài**, nên reCAPTCHA không bao giờ xác minh được thật (vẫn ghi lead bình thường nhờ cơ chế không chặn, nhưng mất luôn tác dụng chống spam). Cách sửa: mở lại Apps Script editor → chọn hàm `testDoPost` ở thanh công cụ trên cùng → nhấn **Chạy (Run)** → khi hộp thoại xin quyền hiện ra, làm đủ hết các bước (kể cả "Advanced → Go to project (unsafe) → Allow") thay vì bấm tắt — chạy xong 1 lần là đủ, quyền sẽ được giữ cho các lần chạy Web App sau.
+
+## Quay số trúng thưởng (`/luckydraw`) — v13
+
+Trang `https://giaothuongquocte.hawee.vn/luckydraw` dùng **chung Web App URL** với form đăng ký (không cần deploy URL mới).
+
+**Cài đặt (làm 1 lần sau khi dán `Code.gs` mới):**
+1. Dán `Code.gs` mới → Lưu → chọn hàm `testLuckyDraw` → **Run** (cấp quyền nếu được hỏi). Hàm này tự tạo 2 tab: **"Quay số - Quà"** (kèm 3 dòng mẫu) và **"Quay số - Người chơi"**; xoá dòng test trong tab Người chơi sau đó.
+2. **Manage deployments → Edit → New version** để URL cũ chạy code mới.
+
+**Vận hành trong sự kiện:**
+- Tab **"Quay số - Quà"** là bảng cấu hình sống: sửa/thêm dòng là có hiệu lực sau tối đa 60 giây. Cột: Tên quà · Loại (`booth` / `forum50` / `forumfree` / `thanks`) · Nơi nhận · Tồn kho · Trọng số · Bật (TRUE/FALSE).
+- Voucher 50% (tồn kho 100) và vé free (tồn kho 5) là 2 dòng loại `forum50` / `forumfree`. Mã ưu đãi Forum vẫn gửi qua email sau; riêng **mã lượt chơi** (dạng `HW-K7M4Q`, cột "Mã lượt chơi" trong tab Người chơi) hiện trên màn kết quả của mọi lượt để gian hàng chụp lại, đối chiếu người thắng.
+- Quà gian hàng: copy từ danh sách doanh nghiệp đã điền form đăng ký quà vào tab "Quay số - Quà" (loại `booth`, cột Nơi nhận = tên gian hàng).
+- Mỗi email quay 1 lần (quay lại → hiện kết quả cũ); email khác quay được lần mới. Không giới hạn theo SĐT.
+- Tab **"Quay số - Người chơi"**: nhân viên tick cột "Đã nhận" khi trao quà; File → Download → .xlsx để lấy bản Excel.
+- Link QR: `https://giaothuongquocte.hawee.vn/luckydraw?src=<vị-trí>` (vd. `?src=cong`, `?src=pavilion`).

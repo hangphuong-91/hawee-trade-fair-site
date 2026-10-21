@@ -2,7 +2,8 @@ import { getRecaptchaToken } from '../lib/recaptcha'
 
 const TIMEOUT_MS = 8000
 
-const appsScriptUrl = () => import.meta.env.VITE_APPS_SCRIPT_URL
+// Biến riêng cho quay số (Config, không bí mật); fallback về biến đăng ký gian hàng cũ.
+const appsScriptUrl = () => import.meta.env.VITE_LUCKYDRAW_SCRIPT_URL || import.meta.env.VITE_APPS_SCRIPT_URL
 const formspreeId = () => import.meta.env.VITE_FORMSPREE_ID
 
 // Vòng quay mặc định khi chưa tải được danh sách giải từ Sheet — chỉ để hiển thị, giải thật do server chọn.

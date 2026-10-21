@@ -18,7 +18,7 @@ function loadScript(siteKey) {
 }
 
 export async function getRecaptchaToken(action) {
-  const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY
+  const siteKey = import.meta.env.VITE_LUCKYDRAW_RECAPTCHA_KEY || import.meta.env.VITE_RECAPTCHA_SITE_KEY
   if (!siteKey) return null
   await loadScript(siteKey)
   return new Promise((resolve, reject) => {

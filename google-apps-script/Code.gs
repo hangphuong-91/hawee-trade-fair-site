@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v12-2026-09-04-antispam-hardening';
+var CODE_VERSION = 'v13-2026-10-21-luckydraw';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -36,6 +36,27 @@ var SHEET_SPAM_LOG = 'Đăng ký bị chặn (spam)';
 var HONEYPOT_FIELD = 'company_website_2';
 
 var HEADERS_SPAM_LOG = ['Thời gian', 'Form', 'Lý do chặn', 'Dữ liệu (JSON)'];
+
+// ===== Quay số trúng thưởng (/luckydraw) =====
+var SHEET_LD_PLAYERS = 'Quay số - Người chơi';
+var SHEET_LD_PRIZES = 'Quay số - Quà';
+var LD_FORM_SOURCE = 'luckydraw';
+
+var HEADERS_LD_PLAYERS = [
+  'Thời gian', 'Họ & Tên', 'Chức vụ', 'Công ty', 'Số điện thoại', 'Email',
+  'Giải', 'Loại giải', 'Nơi nhận', 'Nguồn', 'Đã nhận', 'Ghi chú bảo mật',
+];
+
+// Tab Quà là bảng cấu hình sống — ban tổ chức sửa trực tiếp trong lúc sự kiện (thêm/tắt giải,
+// đổi tồn kho, đổi trọng số). Loại: booth | forum50 | forumfree | thanks.
+var HEADERS_LD_PRIZES = ['Tên quà', 'Loại', 'Nơi nhận / Gian hàng', 'Tồn kho', 'Trọng số', 'Bật (TRUE/FALSE)'];
+
+// Dữ liệu mẫu — chỉ chèn khi tab Quà vừa được tạo lần đầu. Thay bằng danh sách thật trong Sheet.
+var LD_SAMPLE_PRIZES = [
+  ['Voucher giảm 50% vé HAWEE Leaders Forum 2026', 'forum50', 'Mã ưu đãi gửi qua email', 100, 5, true],
+  ['Vé tham dự HAWEE Leaders Forum 2026 (miễn phí)', 'forumfree', 'Mã vé gửi qua email', 10, 1, true],
+  ['Quà tặng từ gian hàng (cập nhật)', 'booth', 'HAWEE Pavilion', 500, 30, true],
+];
 
 var HEADERS_GIAN_HANG = [
   'Thời gian',
@@ -189,6 +210,11 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (data.form_source === LD_FORM_SOURCE) {
+      return ContentService.createTextOutput(JSON.stringify(handleLuckyDraw(data, recaptcha)))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var isSponsor = data.form_source === 'Đăng ký tài trợ';
     var sheetName = isSponsor ? SHEET_TAI_TRO : SHEET_GIAN_HANG;
     var headers = isSponsor ? HEADERS_TAI_TRO : HEADERS_GIAN_HANG;
@@ -229,6 +255,153 @@ function doPost(e) {
     result = { result: 'error', error: err.toString() };
   }
   return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Trả danh sách nhãn giải đang bật để vẽ vòng quay (không lộ tồn kho/trọng số).
+// Gọi: GET <web app url>?action=luckydraw_prizes
+function doGet(e) {
+  var out = { result: 'success', version: CODE_VERSION };
+  try {
+    if (e && e.parameter && e.parameter.action === 'luckydraw_prizes') {
+      out.prizes = ldWheelPrizes();
+    }
+  } catch (err) {
+    out = { result: 'error', error: err.toString() };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function ldPrizesSheet() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var existed = !!ss.getSheetByName(SHEET_LD_PRIZES);
+  var sheet = getOrCreateSheet(SHEET_LD_PRIZES, HEADERS_LD_PRIZES);
+  if (!existed) {
+    sheet.getRange(2, 1, LD_SAMPLE_PRIZES.length, HEADERS_LD_PRIZES.length).setValues(LD_SAMPLE_PRIZES);
+  }
+  return sheet;
+}
+
+// Đọc tab Quà → mảng object, kèm số dòng để trừ tồn kho. Dòng có Bật = FALSE hoặc thiếu tên bị bỏ qua.
+function ldReadPrizes() {
+  var sheet = ldPrizesSheet();
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var values = sheet.getRange(2, 1, last - 1, HEADERS_LD_PRIZES.length).getValues();
+  var list = [];
+  for (var i = 0; i < values.length; i++) {
+    var v = values[i];
+    if (!v[0]) continue;
+    var on = v[5] === true || String(v[5]).toUpperCase() === 'TRUE';
+    list.push({
+      row: i + 2,
+      name: String(v[0]),
+      type: String(v[1] || 'booth'),
+      place: String(v[2] || ''),
+      stock: Number(v[3]) || 0,
+      weight: Number(v[4]) || 0,
+      on: on,
+    });
+  }
+  return list;
+}
+
+// Nhãn hiển thị trên vòng quay: chỉ giải đang bật & còn tồn kho. Cache 60 giây.
+function ldWheelPrizes() {
+  var cache = CacheService.getScriptCache();
+  var hit = cache.get('ld_wheel');
+  if (hit) return JSON.parse(hit);
+  var labels = ldReadPrizes()
+    .filter(function (p) { return p.on && p.stock > 0 && p.weight > 0; })
+    .map(function (p) { return { name: p.name, type: p.type }; });
+  cache.put('ld_wheel', JSON.stringify(labels), 60);
+  return labels;
+}
+
+function ldWeightedPick(pool) {
+  var total = pool.reduce(function (sum, p) { return sum + p.weight; }, 0);
+  var r = Math.random() * total;
+  for (var i = 0; i < pool.length; i++) {
+    r -= pool[i].weight;
+    if (r < 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
+function ldValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Xử lý 1 lượt quay. Mọi lượt đều trúng 1 giải. Mỗi email chỉ quay 1 lần (quay lại → trả kết quả cũ);
+// email khác → quay mới (không giới hạn theo SĐT, theo yêu cầu ban tổ chức).
+function handleLuckyDraw(data, recaptcha) {
+  var email = String(data.email || '').trim().toLowerCase();
+  var name = String(data.contact_name || '').trim();
+  var phone = String(data.phone || '').trim();
+  if (!name || !phone || !ldValidEmail(email)) {
+    return { result: 'error', error: 'invalid_input' };
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var players = getOrCreateSheet(SHEET_LD_PLAYERS, HEADERS_LD_PLAYERS);
+    var last = players.getLastRow();
+    if (last >= 2) {
+      var rows = players.getRange(2, 1, last - 1, HEADERS_LD_PLAYERS.length).getValues();
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i][5]).trim().toLowerCase() === email) {
+          return {
+            result: 'success', version: CODE_VERSION, already_played: true,
+            prize: { name: rows[i][6], type: rows[i][7], place: rows[i][8] },
+          };
+        }
+      }
+    }
+
+    var prizes = ldReadPrizes();
+    var pool = prizes.filter(function (p) { return p.on && p.stock > 0 && p.weight > 0; });
+    if (!pool.length) {
+      return { result: 'error', error: 'no_prize_left' };
+    }
+    var won = ldWeightedPick(pool);
+
+    var sheet = ldPrizesSheet();
+    sheet.getRange(won.row, 4).setValue(won.stock - 1);
+    CacheService.getScriptCache().remove('ld_wheel');
+
+    var row = [
+      new Date(),
+      sanitizeCell(name),
+      sanitizeCell(data.job_title),
+      sanitizeCell(data.company),
+      forceText(phone),
+      sanitizeCell(email),
+      sanitizeCell(won.name),
+      sanitizeCell(won.type),
+      sanitizeCell(won.place),
+      sanitizeCell(data.src),
+      false,
+      sanitizeCell(recaptcha.note),
+    ];
+    players.appendRow(row);
+    players.getRange(players.getLastRow(), 11).insertCheckboxes();
+
+    return {
+      result: 'success', version: CODE_VERSION, already_played: false,
+      prize: { name: won.name, type: won.type, place: won.place },
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Chạy thử trong editor: 1 lượt quay mẫu (tạo sẵn 2 tab Quay số). */
+function testLuckyDraw() {
+  var res = handleLuckyDraw({
+    form_source: LD_FORM_SOURCE, contact_name: 'Test Quay Số', job_title: 'Giám đốc',
+    company: 'Công ty Test', phone: '0900000001', email: 'test+' + Date.now() + '@example.com', src: 'test',
+  }, { verified: false, note: 'Dòng test từ testLuckyDraw()' });
+  Logger.log(JSON.stringify(res));
 }
 
 function parseRequest(e) {

@@ -103,7 +103,8 @@ export default function Wheel({ prizes, target, phase, onFlick, onDone }) {
     const last = d.samples[d.samples.length - 1]
     const fresh = performance.now() - last.t < 120
     const v = fresh ? (last.a - first.a) / Math.max(last.t - first.t, 1) : 0 // độ/ms
-    if (Math.abs(v) > 0.25 || Math.abs(d.total) > 60) {
+    const tap = Math.abs(d.total) < 8 // chạm/click nhẹ lên vòng quay cũng tính là quay
+    if (tap || Math.abs(v) > 0.25 || Math.abs(d.total) > 60) {
       speedRef.current = Math.min(1100, Math.max(540, Math.abs(v) * 1000))
       onFlick()
     }

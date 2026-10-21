@@ -112,7 +112,7 @@ export default function LuckyDraw() {
               animate={phase === 'idle' ? { opacity: [1, 0.55, 1], y: [0, -4, 0] } : { opacity: 1 }}
               transition={{ duration: 1.6, repeat: Infinity }}
             >
-              {phase === 'idle' && 'Dùng tay vuốt vòng quay để quay — hoặc bấm nút QUAY ở giữa'}
+              {phase === 'idle' && 'Chạm vào vòng quay, vuốt tay, hoặc bấm nút QUAY ở giữa để quay'}
               {phase === 'spinning' && 'Đang quay… chúc bạn may mắn!'}
               {phase === 'landing' && 'Sắp có kết quả…'}
             </motion.p>

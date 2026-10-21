@@ -1,9 +1,15 @@
+import { motion } from 'framer-motion'
+
 const FORUM_TYPES = ['forum50', 'forumfree']
 
 export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain }) {
   const isForum = FORUM_TYPES.includes(prize.type)
   return (
-    <div className="mx-auto w-full max-w-md rounded-3xl border border-[#FEB12E]/60 bg-white/10 p-6 text-center backdrop-blur">
+    <motion.div
+      initial={{ scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 160, damping: 14 }}
+      className="relative z-30 mx-auto w-full max-w-md rounded-3xl border border-[#FEB12E]/60 bg-white/10 p-6 text-center backdrop-blur">
       <p className="text-sm font-semibold uppercase tracking-widest text-[#FEB12E]">
         {alreadyPlayed ? 'Email này đã quay — kết quả của bạn' : 'Chúc mừng bạn đã trúng'}
       </p>
@@ -41,6 +47,6 @@ export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain 
       >
         Quay tiếp bằng email khác
       </button>
-    </div>
+    </motion.div>
   )
 }

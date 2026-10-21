@@ -21,8 +21,8 @@ function validate(v) {
   return errors
 }
 
-export default function DrawForm({ onSubmit, busy, errorMessage }) {
-  const [values, setValues] = useState({})
+export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
+  const [values, setValues] = useState(initial || {})
   const [errors, setErrors] = useState({})
   const [agree, setAgree] = useState(true)
 
@@ -76,7 +76,7 @@ export default function DrawForm({ onSubmit, busy, errorMessage }) {
         disabled={busy}
         className="w-full rounded-full bg-gradient-to-r from-[#FEB12E] to-[#E8593A] py-4 text-lg font-bold text-[#50002F] shadow-lg transition active:scale-95 disabled:opacity-60"
       >
-        {busy ? 'Đang xử lý…' : 'Quay ngay'}
+        {busy ? 'Đang xử lý…' : 'Vào vòng quay'}
       </button>
     </form>
   )

@@ -102,7 +102,11 @@ export default function Wheel({ prizes, target, phase, onFlick, onDone }) {
   }
   const onDown = (e) => {
     if (phase !== 'idle' || e.target.closest('button')) return
-    wrapRef.current.setPointerCapture(e.pointerId)
+    try {
+      wrapRef.current.setPointerCapture(e.pointerId) // một số WebView Android (Zalo…) ném lỗi ở đây
+    } catch {
+      /* vẫn quay được, chỉ không giữ con trỏ khi kéo ra ngoài */
+    }
     drag.current = { last: angleOf(e), total: 0, samples: [{ t: performance.now(), a: rotation.get() }] }
   }
   const onMove = (e) => {

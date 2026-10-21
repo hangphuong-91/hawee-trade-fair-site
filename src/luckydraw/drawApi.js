@@ -78,7 +78,7 @@ export async function spin(fields) {
   if (json.result !== 'success') {
     const err = new Error(json.error || 'error')
     err.code = json.error === 'no_prize_left' || json.error === 'invalid_input' ? json.error : 'offline'
-    if (err.code === 'offline') await backupToFormspree(fields, `error:${json.error}`)
+    if (err.code !== 'invalid_input') await backupToFormspree(fields, `error:${json.error}`)
     throw err
   }
 

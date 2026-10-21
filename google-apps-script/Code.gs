@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v14-2026-10-21-luckydraw-code';
+var CODE_VERSION = 'v15-2026-10-21-luckydraw-log-no-prize';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -50,6 +50,7 @@ var HEADERS_LD_PLAYERS = [
 // Mỗi lượt quay có 1 mã riêng (hiện trên màn kết quả) để gian hàng chụp lại, đối chiếu từng người thắng.
 var LD_CODE_COL = 13;
 var LD_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // bỏ I, O, 0, 1 cho dễ đọc
+var LD_NO_PRIZE_TYPE = 'none'; // cột "Loại giải" của khách quay lúc đã hết quà
 
 // Tab Quà là bảng cấu hình sống — ban tổ chức sửa trực tiếp trong lúc sự kiện (thêm/tắt giải,
 // đổi tồn kho, đổi trọng số). Loại: booth | forum50 | forumfree | thanks.
@@ -369,6 +370,8 @@ function handleLuckyDraw(data, recaptcha) {
       var rows = players.getRange(2, 1, last - 1, LD_CODE_COL).getValues();
       for (var i = 0; i < rows.length; i++) {
         usedCodes.push(String(rows[i][LD_CODE_COL - 1]));
+        // Dòng "Hết quà" không tính là đã quay → nếu BTC bổ sung quà, email này vẫn được quay.
+        if (String(rows[i][7]) === LD_NO_PRIZE_TYPE) continue;
         if (String(rows[i][5]).trim().toLowerCase() === email) {
           return {
             result: 'success', version: CODE_VERSION, already_played: true,
@@ -381,16 +384,17 @@ function handleLuckyDraw(data, recaptcha) {
 
     var prizes = ldReadPrizes();
     var pool = prizes.filter(function (p) { return p.on && p.stock > 0 && p.weight > 0; });
-    if (!pool.length) {
-      return { result: 'error', error: 'no_prize_left' };
+    var won;
+    if (pool.length) {
+      won = ldWeightedPick(pool);
+      ldPrizesSheet().getRange(won.row, 4).setValue(won.stock - 1);
+      CacheService.getScriptCache().remove('ld_wheel');
+    } else {
+      // Hết quà: vẫn ghi nhận thông tin khách, không để sót data.
+      won = { name: 'Hết quà', type: LD_NO_PRIZE_TYPE, place: '' };
     }
-    var won = ldWeightedPick(pool);
 
-    var sheet = ldPrizesSheet();
-    sheet.getRange(won.row, 4).setValue(won.stock - 1);
-    CacheService.getScriptCache().remove('ld_wheel');
-
-    var code = ldNewCode(usedCodes);
+    var code = pool.length ? ldNewCode(usedCodes) : '';
     var row = [
       new Date(),
       sanitizeCell(name),
@@ -409,6 +413,7 @@ function handleLuckyDraw(data, recaptcha) {
     players.appendRow(row);
     players.getRange(players.getLastRow(), 11).insertCheckboxes();
 
+    if (!pool.length) return { result: 'error', error: 'no_prize_left', version: CODE_VERSION };
     return {
       result: 'success', version: CODE_VERSION, already_played: false, code: code,
       prize: { name: won.name, type: won.type, place: won.place },

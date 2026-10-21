@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { animate, motion, useMotionValue } from 'framer-motion'
 
-const SIZE = 320
-const R = SIZE / 2
+const R = 200 // bán kính phần vòng quay
+const VIEW = 452 // khung SVG (chừa viền đèn + kim chỉ)
+const C = VIEW / 2
 const PALETTE = ['#C9187F', '#50002F', '#FEB12E', '#E8593A', '#7A1244', '#FB6094']
 const TEXT_ON = { '#FEB12E': '#50002F', '#FB6094': '#50002F' }
 const MAX_SEGMENTS = 12
+const MIN_SEGMENTS = 8 // ít giải thì lặp lại để vòng quay đủ đầy, đẹp
 
 const polar = (deg, r) => {
   const rad = ((deg - 90) * Math.PI) / 180
-  return [R + r * Math.cos(rad), R + r * Math.sin(rad)]
+  return [C + r * Math.cos(rad), C + r * Math.sin(rad)]
 }
-
-const shorten = (s) => (s.length > 18 ? `${s.slice(0, 17)}…` : s)
 
 // Chọn các nhãn hiển thị: luôn giữ giải Forum (voucher 50% + vé miễn phí) trên vòng, rồi trộn xen kẽ
 // với quà gian hàng cho đẹp; đảm bảo giải trúng luôn có mặt để vòng quay dừng đúng.
@@ -34,7 +34,28 @@ export function buildSegments(prizes, target) {
     if (fi < forumPicked.length && (i % step === 0 || ri >= rest.length)) mixed.push(forumPicked[fi++])
     else mixed.push(rest[ri++])
   }
-  return mixed.length >= 2 ? mixed : [...mixed, ...mixed, ...mixed]
+  const base = mixed.length >= 2 ? mixed : [...mixed, ...mixed, ...mixed]
+  const reps = Math.ceil(MIN_SEGMENTS / base.length)
+  return Array.from({ length: reps }, () => base).flat()
+}
+
+// Nhãn ngắn, chữ lớn trên vòng quay (tối đa 2 dòng); tên đầy đủ vẫn hiện ở màn kết quả.
+function labelLines(p, maxChars) {
+  if (p.type === 'forum50') return ['VOUCHER 50%', 'VÉ FORUM']
+  if (p.type === 'forumfree') return ['VÉ FORUM', 'MIỄN PHÍ']
+  const words = p.name.split(/\s+/)
+  const lines = ['']
+  words.forEach((w) => {
+    const cur = lines[lines.length - 1]
+    if (!cur) lines[lines.length - 1] = w
+    else if (`${cur} ${w}`.length <= maxChars) lines[lines.length - 1] = `${cur} ${w}`
+    else if (lines.length < 2) lines.push(w)
+    else lines[1] = `${lines[1]} ${w}`
+  })
+  return lines.slice(0, 2).map((l, i, arr) => {
+    const t = i === arr.length - 1 && lines.join(' ').length > arr.join(' ').length ? `${l} …` : l
+    return t.length > maxChars ? `${t.slice(0, maxChars - 1)}…` : t
+  })
 }
 
 export default function Wheel({ prizes, target, phase, onFlick, onDone }) {
@@ -44,6 +65,8 @@ export default function Wheel({ prizes, target, phase, onFlick, onDone }) {
   const speedRef = useRef(540)
   const segments = useMemo(() => buildSegments(prizes, target), [prizes, target])
   const seg = 360 / segments.length
+  const fontSize = seg >= 45 ? 24 : seg >= 36 ? 21 : 19
+  const maxChars = Math.floor(118 / (fontSize * 0.56))
 
   // idle: trôi chậm mời gọi; spinning: quay liên tục chờ server; landing: giảm tốc dừng đúng giải.
   useEffect(() => {
@@ -115,62 +138,106 @@ export default function Wheel({ prizes, target, phase, onFlick, onDone }) {
     onFlick()
   }
 
+  const bulbs = Array.from({ length: 24 }, (_, i) => polar(i * 15, R + 13))
+
   return (
     <div
       ref={wrapRef}
       className="relative mx-auto select-none"
-      style={{ width: SIZE, maxWidth: '88vw', touchAction: 'none', cursor: phase === 'idle' ? 'grab' : 'default' }}
+      style={{ width: 'min(94vw, 460px)', touchAction: 'none', cursor: phase === 'idle' ? 'grab' : 'default' }}
       onPointerDown={onDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
     >
-      <div
-        className="absolute left-1/2 -top-3 z-10 -translate-x-1/2"
-        style={{
-          width: 0,
-          height: 0,
-          borderLeft: '16px solid transparent',
-          borderRight: '16px solid transparent',
-          borderTop: '32px solid #FEB12E',
-          filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.5))',
-        }}
-      />
-      <div className="rounded-full p-2" style={{ background: 'linear-gradient(135deg,#FEB12E,#E8593A)', boxShadow: '0 0 40px rgba(254,177,46,.45)' }}>
-        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="block w-full overflow-hidden rounded-full">
-          <motion.g style={{ rotate: rotation, originX: 0.5, originY: 0.5 }}>
-            {segments.map((p, i) => {
-              const [x1, y1] = polar(i * seg, R)
-              const [x2, y2] = polar((i + 1) * seg, R)
-              const fill = PALETTE[i % PALETTE.length]
-              const [tx, ty] = polar((i + 0.5) * seg, R * 0.62)
-              return (
-                <g key={i}>
-                  <path d={`M${R},${R} L${x1},${y1} A${R},${R} 0 0 1 ${x2},${y2} Z`} fill={fill} stroke="#FFFAF9" strokeWidth="1.5" />
-                  <text
-                    x={tx}
-                    y={ty}
-                    fill={TEXT_ON[fill] || '#FFFAF9'}
-                    fontSize="11"
-                    fontWeight="600"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    transform={`rotate(${(i + 0.5) * seg} ${tx} ${ty})`}
-                  >
-                    {shorten(p.name)}
-                  </text>
+      <svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="block w-full overflow-visible" style={{ filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.45))' }}>
+        <defs>
+          <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#FFE7A3" />
+            <stop offset=".45" stopColor="#FEB12E" />
+            <stop offset="1" stopColor="#E8593A" />
+          </linearGradient>
+          <radialGradient id="shade" cx=".5" cy=".5" r=".5">
+            <stop offset=".55" stopColor="#000" stopOpacity="0" />
+            <stop offset="1" stopColor="#000" stopOpacity=".28" />
+          </radialGradient>
+          <radialGradient id="gloss" cx=".32" cy=".22" r=".7">
+            <stop offset="0" stopColor="#fff" stopOpacity=".28" />
+            <stop offset=".6" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="hub" cx=".4" cy=".35" r=".8">
+            <stop offset="0" stopColor="#7A1244" />
+            <stop offset="1" stopColor="#2B081F" />
+          </radialGradient>
+        </defs>
+
+        {/* viền vàng + bóng đèn */}
+        <circle cx={C} cy={C} r={R + 22} fill="url(#rim)" />
+        <circle cx={C} cy={C} r={R + 4} fill="#2B081F" />
+        {bulbs.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r="4.6" fill="#FFF6D6" stroke="#E8593A" strokeWidth="1" />
+        ))}
+
+        <motion.g style={{ rotate: rotation, originX: 0.5, originY: 0.5 }}>
+          {segments.map((p, i) => {
+            const [x1, y1] = polar(i * seg, R)
+            const [x2, y2] = polar((i + 1) * seg, R)
+            const fill = PALETTE[i % PALETTE.length]
+            const mid = (i + 0.5) * seg
+            const lines = labelLines(p, maxChars)
+            const lh = fontSize * 1.12
+            return (
+              <g key={i}>
+                <path d={`M${C},${C} L${x1},${y1} A${R},${R} 0 0 1 ${x2},${y2} Z`} fill={fill} stroke="#FFFAF9" strokeWidth="2.5" />
+                <g transform={`rotate(${mid - 90} ${C} ${C})`}>
+                  {lines.map((l, k) => (
+                    <text
+                      key={k}
+                      x={C + R - 16}
+                      y={C + (k - (lines.length - 1) / 2) * lh}
+                      fill={TEXT_ON[fill] || '#FFFFFF'}
+                      fontSize={fontSize}
+                      fontWeight="700"
+                      textAnchor="end"
+                      dominantBaseline="central"
+                      style={{
+                        fontFamily: 'MonaSans, Inter, sans-serif',
+                        letterSpacing: '.01em',
+                        paintOrder: 'stroke',
+                        stroke: TEXT_ON[fill] ? 'rgba(255,255,255,.25)' : 'rgba(43,8,31,.45)',
+                        strokeWidth: 3,
+                        strokeLinejoin: 'round',
+                      }}
+                    >
+                      {l}
+                    </text>
+                  ))}
                 </g>
-              )
-            })}
-          </motion.g>
-        </svg>
-      </div>
+              </g>
+            )
+          })}
+        </motion.g>
+
+        {/* ánh sáng cố định phủ lên vòng quay */}
+        <circle cx={C} cy={C} r={R} fill="url(#shade)" pointerEvents="none" />
+        <circle cx={C} cy={C} r={R} fill="url(#gloss)" pointerEvents="none" />
+        <circle cx={C} cy={C} r={R + 1} fill="none" stroke="#FFE7A3" strokeWidth="3" />
+
+        {/* tâm vòng quay */}
+        <circle cx={C} cy={C} r="52" fill="#FEB12E" />
+        <circle cx={C} cy={C} r="46" fill="url(#hub)" stroke="#FFE7A3" strokeWidth="3" />
+
+        {/* kim chỉ */}
+        <path d={`M${C - 22},4 L${C + 22},4 L${C},56 Z`} fill="#FEB12E" stroke="#50002F" strokeWidth="4" strokeLinejoin="round" />
+        <circle cx={C} cy="18" r="5" fill="#50002F" />
+      </svg>
+
       <button
         type="button"
         onClick={flickByButton}
         disabled={phase !== 'idle'}
         aria-label="Quay"
-        className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-[#FEB12E] bg-[#50002F] text-base font-extrabold tracking-wider text-[#FEB12E] shadow-xl transition active:scale-90 disabled:opacity-80"
+        className="absolute left-1/2 top-1/2 flex h-[22%] w-[22%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[clamp(14px,4.2vw,20px)] font-extrabold tracking-wider text-[#FEB12E] transition active:scale-90 disabled:opacity-80"
       >
         {phase === 'idle' ? 'QUAY' : '…'}
       </button>

@@ -91,18 +91,17 @@ export default function LuckyDraw() {
             <img src="/hawee-logo-final.png" alt="HAWEE — Ho Chi Minh City Association for Women Executives & Entrepreneurs" className="h-12 w-auto" />
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#FEB12E]">HAWEE International Trade Fair 2026</p>
-          <h1 className="mt-2 text-3xl font-bold leading-tight">Quay số trúng thưởng</h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-white/75">
-            Quà tại các gian hàng HAWEE Pavilion và ưu đãi vé tham dự HAWEE Leaders Forum 2026.
+          <h1 className="mt-2 text-4xl font-bold leading-tight">Quay số trúng thưởng</h1>
+          <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-white/85">
+            Quà tại các gian hàng HAWEE Pavilion và vé tham dự HAWEE Leaders Forum 2026 trị giá <b className="text-[#FEB12E]">2.000.000đ</b>
           </p>
-          <ul className="mx-auto mt-4 flex max-w-sm flex-wrap justify-center gap-2 text-xs font-semibold">
-            <li className="rounded-full border border-[#FEB12E]/60 bg-white/10 px-3 py-1.5 text-[#FEB12E]">100 voucher giảm 50% vé Forum</li>
-            <li className="rounded-full border border-[#FEB12E]/60 bg-white/10 px-3 py-1.5 text-[#FEB12E]">5 vé Forum miễn phí</li>
-            <li className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-white/90">Quà tại gian hàng Pavilion</li>
-          </ul>
         </header>
 
-        {stage === 'form' && <DrawForm onSubmit={onSubmit} errorMessage={error} initial={fields || undefined} />}
+        {stage === 'form' && (
+          <div className="mx-auto w-full max-w-md rounded-3xl border border-white/15 bg-white/[.06] p-5 shadow-2xl backdrop-blur">
+            <DrawForm onSubmit={onSubmit} errorMessage={error} initial={fields || undefined} />
+          </div>
+        )}
 
         {stage === 'play' && (
           <div className="space-y-8 pt-3">

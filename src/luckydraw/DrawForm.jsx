@@ -28,8 +28,13 @@ export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
 
   const handle = (e) => {
     e.preventDefault()
+    const fd = new FormData(e.currentTarget)
     // Honeypot: bot điền field ẩn này thì bỏ qua âm thầm.
-    if (new FormData(e.target).get('company_website_2')) return
+    if (fd.get('hp_trap_x')) return
+    // Đọc thẳng từ DOM thay vì state: autofill/bàn phím Android (Gboard, Telex) đôi khi điền giá trị mà
+    // không phát sự kiện React → state rỗng dù ô đã có chữ.
+    const values = Object.fromEntries(FIELDS.map((f) => [f.name, String(fd.get(f.name) ?? '')]))
+    setValues(values)
     const errs = validate(values)
     if (!agree) errs.agree = 'Vui lòng đồng ý để tham gia'
     setErrors(errs)
@@ -50,8 +55,7 @@ export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
             type={f.type}
             autoComplete={f.autoComplete}
             inputMode={f.inputMode}
-            value={values[f.name] ?? ''}
-            onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
+            defaultValue={values[f.name] ?? ''}
             className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none focus:border-[#FEB12E]"
           />
           {errors[f.name] && <span className="mt-1 block text-xs text-[#FEB12E]">{errors[f.name]}</span>}
@@ -59,7 +63,7 @@ export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
       ))}
       <input
         type="text"
-        name="company_website_2"
+        name="hp_trap_x"
         tabIndex={-1}
         autoComplete="off"
         aria-hidden="true"

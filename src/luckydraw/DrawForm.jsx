@@ -8,19 +8,32 @@ const FIELDS = [
   { name: 'email', label: 'Email', type: 'email', autoComplete: 'email', inputMode: 'email' },
 ]
 
-const PHONE_RE = /^(0|\+?84)\d{9}$/
+const PHONE_RE = /^0[35789]\d{8}$/ // di động VN sau khi chuẩn hoá
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Autofill danh bạ Android hay điền dạng "+84 (90) 123-4567" → chỉ giữ chữ số (và dấu + đầu).
-const normalizePhone = (p) => p.trim().replace(/(?!^\+)[^\d]/g, '')
+const normalizePhone = (p) => {
+  const d = p.replace(/[^\d]/g, '')
+  return /^84\d{9}$/.test(d) ? `0${d.slice(2)}` : d
+}
+
+// Gõ nhầm tên miền email hay gặp → gợi ý sửa (vd. gmial.com → gmail.com).
+const EMAIL_TYPOS = {
+  'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmal.com': 'gmail.com', 'gmail.con': 'gmail.com',
+  'gmail.co': 'gmail.com', 'gmail.vn': 'gmail.com', 'gamil.com': 'gmail.com', 'gnail.com': 'gmail.com',
+  'gmail.comm': 'gmail.com', 'yahoo.con': 'yahoo.com', 'yaho.com': 'yahoo.com', 'hotmial.com': 'hotmail.com',
+  'hotmail.con': 'hotmail.com', 'outlook.con': 'outlook.com', 'icloud.con': 'icloud.com',
+}
 
 function validate(v) {
   const errors = {}
   FIELDS.forEach((f) => {
     if (!v[f.name]?.trim()) errors[f.name] = 'Vui lòng nhập thông tin này'
   })
-  if (!errors.phone && !PHONE_RE.test(normalizePhone(v.phone))) errors.phone = 'Số điện thoại chưa đúng định dạng'
+  if (!errors.phone && !PHONE_RE.test(normalizePhone(v.phone))) errors.phone = 'Số di động VN gồm 10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09'
   if (!errors.email && !EMAIL_RE.test(v.email.trim())) errors.email = 'Email chưa đúng định dạng'
+  const domain = v.email.trim().toLowerCase().split('@')[1]
+  if (!errors.email && EMAIL_TYPOS[domain]) errors.email = `Có phải bạn muốn nhập @${EMAIL_TYPOS[domain]}?`
   return errors
 }
 

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 
 
-export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain }) {
+export default function ResultCard({ prize, code, alreadyPlayed, email }) {
   const isForum = String(prize.type).startsWith('forum') // forum50, forum30, forumfree… đều do BTC gửi mã qua email
   return (
     <motion.div
@@ -10,7 +10,7 @@ export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain 
       transition={{ type: 'spring', stiffness: 160, damping: 14 }}
       className="relative z-30 mx-auto w-full max-w-md rounded-3xl border border-[#FEB12E]/60 bg-white/10 p-6 text-center backdrop-blur">
       <p className="text-sm font-semibold uppercase tracking-widest text-[#FEB12E]">
-        {alreadyPlayed ? 'Email này đã quay — kết quả của bạn' : 'Chúc mừng bạn đã trúng'}
+        {alreadyPlayed ? 'Bạn đã tham gia quay số — kết quả của bạn' : 'Chúc mừng bạn đã trúng'}
       </p>
       <h2 className="mt-3 text-2xl font-bold leading-snug text-white">{prize.name}</h2>
       {code && (
@@ -40,12 +40,9 @@ export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain 
           Xem thông tin HAWEE Leaders Forum 2026
         </a>
       )}
-      <button
-        onClick={onAgain}
-        className="mt-6 w-full rounded-full border border-white/40 py-3 text-sm font-semibold text-white transition active:scale-95"
-      >
-        Quay tiếp bằng email khác
-      </button>
+      <p className="mt-6 text-xs leading-relaxed text-white/60">
+        Mỗi khách (mỗi thiết bị, số điện thoại và email) được quay 1 lần. Cảm ơn bạn đã tham gia cùng HAWEE!
+      </p>
     </motion.div>
   )
 }

@@ -4,24 +4,27 @@ import DrawForm from './DrawForm'
 import ResultCard from './ResultCard'
 import Wheel from './Wheel'
 import { FloatingGifts, GiftRain } from './Gifts'
-import { FALLBACK_WHEEL, fetchWheelPrizes, spin } from './drawApi'
+import { FALLBACK_WHEEL, fetchWheelPrizes, getSavedResult, spin } from './drawApi'
 
 const MESSAGES = {
   offline:
     'Hệ thống đang bận. Thông tin của bạn đã được ghi nhận, đội ngũ HAWEE sẽ liên hệ để trao quà. Bạn cũng có thể thử lại sau ít phút.',
   no_prize_left: 'Rất tiếc, các phần quà đã được trao hết. Cảm ơn bạn đã tham gia!',
   invalid_input: 'Thông tin chưa hợp lệ, vui lòng kiểm tra lại.',
+  invalid_phone: 'Số điện thoại chưa đúng. Vui lòng nhập số di động Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09).',
+  invalid_email: 'Email này không nhận được thư. Vui lòng nhập email bạn đang dùng để nhận quà và mã ưu đãi.',
 }
 
 const MIN_SPIN_MS = 1500 // vòng quay luôn quay ít nhất chừng này trước khi giảm tốc, dù server trả nhanh
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 export default function LuckyDraw() {
-  const [stage, setStage] = useState('form') // form | play | result
+  const [saved] = useState(getSavedResult) // thiết bị này đã quay → hiện lại kết quả, không cho quay tiếp
+  const [stage, setStage] = useState(saved ? 'result' : 'form') // form | play | result
   const [phase, setPhase] = useState('idle') // idle | spinning | landing (chỉ dùng ở stage play)
   const [wheel, setWheel] = useState(FALLBACK_WHEEL)
   const [fields, setFields] = useState(null)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(saved)
   const [error, setError] = useState('')
   const src = new URLSearchParams(window.location.search).get('src') || ''
 
@@ -66,14 +69,6 @@ export default function LuckyDraw() {
       setPhase('idle')
     }, 700)
 
-  const reset = () => {
-    setFields((f) => ({ ...f, email: '' })) // giữ thông tin người chơi, chỉ nhập lại email khác
-    setResult(null)
-    setError('')
-    setStage('form')
-    fetchWheelPrizes().then(setWheel)
-  }
-
   return (
     <main
       className="relative min-h-screen overflow-hidden px-4 pb-12 pt-8 text-white"
@@ -83,7 +78,7 @@ export default function LuckyDraw() {
       }}
     >
       <FloatingGifts />
-      {stage === 'result' && <GiftRain />}
+      {stage === 'result' && !result?.alreadyPlayed && <GiftRain />}
 
       <div className="relative z-10">
         <header className="mb-6 text-center">
@@ -119,7 +114,7 @@ export default function LuckyDraw() {
         )}
 
         {stage === 'result' && result && (
-          <ResultCard prize={result.prize} code={result.code} alreadyPlayed={result.alreadyPlayed} email={fields?.email || ''} onAgain={reset} />
+          <ResultCard prize={result.prize} code={result.code} alreadyPlayed={result.alreadyPlayed} email={fields?.email || result.email || ''} />
         )}
       </div>
     </main>

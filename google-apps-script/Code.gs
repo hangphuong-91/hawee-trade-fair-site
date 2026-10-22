@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v15-2026-10-21-luckydraw-log-no-prize';
+var CODE_VERSION = 'v16-2026-10-22-luckydraw-device-limit';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -44,13 +44,19 @@ var LD_FORM_SOURCE = 'luckydraw';
 
 var HEADERS_LD_PLAYERS = [
   'Thời gian', 'Họ & Tên', 'Chức vụ', 'Công ty', 'Số điện thoại', 'Email',
-  'Giải', 'Loại giải', 'Nơi nhận', 'Nguồn', 'Đã nhận', 'Ghi chú bảo mật', 'Mã lượt chơi',
+  'Giải', 'Loại giải', 'Nơi nhận', 'Nguồn', 'Đã nhận', 'Ghi chú bảo mật', 'Mã lượt chơi', 'Mã thiết bị',
 ];
 
 // Mỗi lượt quay có 1 mã riêng (hiện trên màn kết quả) để gian hàng chụp lại, đối chiếu từng người thắng.
 var LD_CODE_COL = 13;
 var LD_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // bỏ I, O, 0, 1 cho dễ đọc
 var LD_NO_PRIZE_TYPE = 'none'; // cột "Loại giải" của khách quay lúc đã hết quà
+// Chống gian lận: mỗi thiết bị / SĐT / email chỉ quay 1 lần (BTC đổi từ "nhiều lần với email khác").
+var LD_DEVICE_COL = 14;
+// Email dùng 1 lần phổ biến — chặn thẳng.
+var LD_DISPOSABLE_DOMAINS = ['mailinator.com', 'yopmail.com', 'tempmail.com', 'temp-mail.org', '10minutemail.com',
+  'guerrillamail.com', 'sharklasers.com', 'getnada.com', 'trashmail.com', 'dispostable.com', 'maildrop.cc',
+  'throwawaymail.com', 'fakeinbox.com', 'emailondeck.com', 'mohmal.com', 'mintemail.com', 'tempail.com'];
 
 // Tab Quà là bảng cấu hình sống — ban tổ chức sửa trực tiếp trong lúc sự kiện (thêm/tắt giải,
 // đổi tồn kho, đổi trọng số). Loại: booth | forum50 | forumfree | thanks.
@@ -346,15 +352,50 @@ function ldValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Xử lý 1 lượt quay. Mọi lượt đều trúng 1 giải. Mỗi email chỉ quay 1 lần (quay lại → trả kết quả cũ);
-// email khác → quay mới (không giới hạn theo SĐT, theo yêu cầu ban tổ chức).
+// SĐT di động VN: chuẩn hoá +84/84 → 0, chỉ nhận đầu 03/05/07/08/09 + 8 số. Trả '' nếu không hợp lệ.
+function ldNormalizePhone(phone) {
+  var d = String(phone || '').replace(/[^\d]/g, '');
+  if (/^84\d{9}$/.test(d)) d = '0' + d.slice(2);
+  return /^0[35789]\d{8}$/.test(d) ? d : '';
+}
+
+// Tên miền email có nhận thư được không (có bản ghi MX hoặc A) — hỏi DNS công khai của Google,
+// lưu cache 6 giờ. Lỗi mạng → cho qua (không chặn khách thật vì sự cố DNS).
+function ldEmailDomainOk(email) {
+  var domain = email.split('@')[1];
+  if (LD_DISPOSABLE_DOMAINS.indexOf(domain) !== -1) return false;
+  var cache = CacheService.getScriptCache();
+  var key = 'ld_mx_' + domain;
+  var hit = cache.get(key);
+  if (hit) return hit === '1';
+  try {
+    var ok = false;
+    var types = ['MX', 'A'];
+    for (var t = 0; t < types.length && !ok; t++) {
+      var resp = UrlFetchApp.fetch('https://dns.google/resolve?name=' + encodeURIComponent(domain) + '&type=' + types[t],
+        { muteHttpExceptions: true });
+      var json = JSON.parse(resp.getContentText());
+      ok = json.Status === 0 && !!(json.Answer && json.Answer.length);
+    }
+    cache.put(key, ok ? '1' : '0', 21600);
+    return ok;
+  } catch (err) {
+    return true;
+  }
+}
+
+// Xử lý 1 lượt quay. Mọi lượt đều trúng 1 giải. Mỗi email / SĐT / thiết bị chỉ quay 1 lần — trùng bất kỳ
+// cái nào → trả lại kết quả cũ (chống gian lận bằng cách đổi email).
 function handleLuckyDraw(data, recaptcha) {
   var email = String(data.email || '').trim().toLowerCase();
   var name = String(data.contact_name || '').trim();
-  var phone = String(data.phone || '').trim();
-  if (!name || !phone || !ldValidEmail(email)) {
+  var phone = ldNormalizePhone(data.phone);
+  var device = String(data.device_id || '').replace(/[^\w-]/g, '').slice(0, 64);
+  if (!name || !ldValidEmail(email)) {
     return { result: 'error', error: 'invalid_input' };
   }
+  if (!phone) return { result: 'error', error: 'invalid_phone' };
+  if (!ldEmailDomainOk(email)) return { result: 'error', error: 'invalid_email' };
 
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -364,15 +405,21 @@ function handleLuckyDraw(data, recaptcha) {
     if (!players.getRange(1, LD_CODE_COL).getValue()) {
       players.getRange(1, LD_CODE_COL).setValue('Mã lượt chơi').setFontWeight('bold');
     }
+    if (!players.getRange(1, LD_DEVICE_COL).getValue()) {
+      players.getRange(1, LD_DEVICE_COL).setValue('Mã thiết bị').setFontWeight('bold');
+    }
     var last = players.getLastRow();
     var usedCodes = [];
     if (last >= 2) {
-      var rows = players.getRange(2, 1, last - 1, LD_CODE_COL).getValues();
+      var rows = players.getRange(2, 1, last - 1, LD_DEVICE_COL).getValues();
       for (var i = 0; i < rows.length; i++) {
         usedCodes.push(String(rows[i][LD_CODE_COL - 1]));
         // Dòng "Hết quà" không tính là đã quay → nếu BTC bổ sung quà, email này vẫn được quay.
         if (String(rows[i][7]) === LD_NO_PRIZE_TYPE) continue;
-        if (String(rows[i][5]).trim().toLowerCase() === email) {
+        var sameEmail = String(rows[i][5]).trim().toLowerCase() === email;
+        var samePhone = ldNormalizePhone(rows[i][4]) === phone;
+        var sameDevice = !!device && String(rows[i][LD_DEVICE_COL - 1]) === device;
+        if (sameEmail || samePhone || sameDevice) {
           return {
             result: 'success', version: CODE_VERSION, already_played: true,
             code: String(rows[i][LD_CODE_COL - 1]),
@@ -409,6 +456,7 @@ function handleLuckyDraw(data, recaptcha) {
       false,
       sanitizeCell(recaptcha.note),
       code,
+      device,
     ];
     players.appendRow(row);
     players.getRange(players.getLastRow(), 11).insertCheckboxes();

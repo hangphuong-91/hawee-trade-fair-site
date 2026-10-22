@@ -14,9 +14,9 @@ const ERRORS = {
 const boothKey = (v) => String(v || '').replace(/\s+/g, '').toUpperCase()
 
 const input =
-  'w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none focus:border-[#FEB12E]'
+  'w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none focus:border-[#FFC83D]'
 const button =
-  'w-full rounded-full bg-gradient-to-r from-[#FEB12E] to-[#E8593A] py-4 text-lg font-bold text-[#50002F] shadow-lg transition active:scale-95 disabled:opacity-50'
+  'w-full rounded-full bg-gradient-to-r from-[#FFE08A] to-[#F59E0B] py-4 text-lg font-extrabold uppercase text-[#4A0B3E] shadow-lg transition active:scale-95 disabled:opacity-50'
 
 // /voucher/use?c=<mã>&t=<mã bảo mật> — gian hàng quét QR của khách bằng camera điện thoại là vào trang này.
 // Không có tham số → gian hàng nhập tay mã voucher + 4 số cuối SĐT của khách.
@@ -90,7 +90,7 @@ export default function Redeem() {
       <VoucherShell eyebrow="Dành cho gian hàng HAWEE Pavilion" title="Đã xác nhận voucher">
         <div className={`${panel} text-center`}>
           <CheckCircle2 className="mx-auto h-20 w-20 text-[#7BE0A0]" />
-          <p className="mt-3 font-mono text-3xl font-bold tracking-[0.15em] text-[#FEB12E]">{done.code}</p>
+          <p className="mt-3 font-mono text-3xl font-bold tracking-[0.15em] text-[#FFC83D]">{done.code}</p>
           <p className="mt-1 text-white/80">
             {done.name} · {done.phone}
           </p>
@@ -109,7 +109,7 @@ export default function Redeem() {
             Hệ thống đã ghi nhận. Gian hàng trừ 500.000đ vào hoá đơn của khách; HAWEE sẽ đối soát và thanh toán theo dữ liệu
             này.
           </p>
-          <a href="/voucher/use" className="mt-5 inline-block text-sm font-semibold text-[#FEB12E] underline">
+          <a href="/voucher/use" className="mt-5 inline-block text-sm font-semibold text-[#FFC83D] underline">
             Nhập tay voucher khác
           </a>
         </div>
@@ -131,7 +131,7 @@ export default function Redeem() {
             voucher && (
               <div className="rounded-2xl bg-black/30 p-4 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-white/70">Voucher 500.000đ</p>
-                <p className="mt-1 font-mono text-3xl font-bold tracking-[0.15em] text-[#FEB12E]">{voucher.code}</p>
+                <p className="mt-1 font-mono text-3xl font-bold tracking-[0.15em] text-[#FFC83D]">{voucher.code}</p>
                 <p className="mt-1 text-white/85">
                   {voucher.name} · {voucher.phone}
                 </p>
@@ -165,7 +165,7 @@ export default function Redeem() {
 
         {usedAlready ? (
           <p className="flex items-start gap-2 rounded-xl bg-[#C9187F]/30 p-4 text-sm leading-relaxed">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#FEB12E]" />
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#FFC83D]" />
             <span>
               <b>Voucher này đã được sử dụng</b> tại {voucher.booth} lúc {formatTime(voucher.used_at)}. Không áp dụng lại.
             </span>
@@ -194,7 +194,7 @@ export default function Redeem() {
                     Gian hàng: <b>{booth.name}</b>
                   </span>
                 )}
-                {boothError && <span className="mt-1 block text-xs text-[#FEB12E]">{boothError}</span>}
+                {boothError && <span className="mt-1 block text-xs text-[#FFC83D]">{boothError}</span>}
               </label>
 
               <p className="text-xs leading-relaxed text-white/65">
@@ -202,7 +202,7 @@ export default function Redeem() {
                 hàng — HAWEE không chịu trách nhiệm với voucher ghi nhận sai gian do nhập nhầm mã. Mỗi voucher chỉ dùng 1 lần.
               </p>
 
-              {error && <p className="rounded-lg bg-black/30 p-3 text-sm text-[#FEB12E]">{error}</p>}
+              {error && <p className="rounded-lg bg-black/30 p-3 text-sm text-[#FFC83D]">{error}</p>}
 
               {booth ? (
                 <button type="submit" disabled={busy || (!token && (!code.trim() || phone4.length !== 4))} className={button}>
@@ -217,7 +217,7 @@ export default function Redeem() {
           )
         )}
 
-        {!voucher && token && !loading && error && <p className="rounded-lg bg-black/30 p-3 text-sm text-[#FEB12E]">{error}</p>}
+        {!voucher && token && !loading && error && <p className="rounded-lg bg-black/30 p-3 text-sm text-[#FFC83D]">{error}</p>}
       </form>
     </VoucherShell>
   )

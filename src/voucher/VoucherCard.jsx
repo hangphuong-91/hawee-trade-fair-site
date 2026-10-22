@@ -37,8 +37,8 @@ export default function VoucherCard({ voucher }) {
   const used = status?.used
 
   return (
-    <div className="rounded-3xl border border-[#FEB12E]/60 bg-white/10 p-6 text-center backdrop-blur">
-      <p className="text-sm font-semibold uppercase tracking-widest text-[#FEB12E]">
+    <div className="vc-card p-6 text-center">
+      <p className="text-sm font-semibold uppercase tracking-widest text-[#FFC83D]">
         {voucher.alreadyClaimed ? 'Voucher của bạn' : 'Chúc mừng! Bạn đã nhận voucher'}
       </p>
       <h2 className="mt-2 text-2xl font-bold text-white">Voucher mua sắm 500.000đ</h2>
@@ -60,11 +60,11 @@ export default function VoucherCard({ voucher }) {
       </div>
 
       <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-white/70">Mã voucher</p>
-      <p className="mt-1 font-mono text-3xl font-bold tracking-[0.15em] text-[#FEB12E]">{voucher.code}</p>
+      <p className="mt-1 font-mono text-3xl font-bold tracking-[0.15em] text-[#FFC83D]">{voucher.code}</p>
 
       {used ? (
         <p className="mt-4 flex items-start justify-center gap-2 rounded-xl bg-black/30 p-3 text-left text-sm text-white/90">
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#FEB12E]" />
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#FFC83D]" />
           <span>
             Đã sử dụng tại <b>{status.booth}</b> lúc {formatTime(status.used_at)}.
           </span>

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/be-vietnam-pro": "^5.2.5",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
     "qrcode": "^1.5.4",

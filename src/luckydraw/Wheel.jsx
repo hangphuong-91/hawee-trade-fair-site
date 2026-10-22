@@ -9,6 +9,8 @@ const TEXT_ON = { '#FEB12E': '#50002F', '#FB6094': '#50002F' }
 const MAX_SEGMENTS = 12
 const MIN_SEGMENTS = 8 // ít giải thì lặp lại để vòng quay đủ đầy, đẹp
 
+const isForum = (p) => String(p.type).startsWith('forum')
+
 const polar = (deg, r) => {
   const rad = ((deg - 90) * Math.PI) / 180
   return [C + r * Math.cos(rad), C + r * Math.sin(rad)]
@@ -17,14 +19,14 @@ const polar = (deg, r) => {
 // Chọn các nhãn hiển thị: luôn giữ giải Forum (voucher 50% + vé miễn phí) trên vòng, rồi trộn xen kẽ
 // với quà gian hàng cho đẹp; đảm bảo giải trúng luôn có mặt để vòng quay dừng đúng.
 export function buildSegments(prizes, target) {
-  const forum = prizes.filter((p) => p.type === 'forum50' || p.type === 'forumfree')
-  const others = prizes.filter((p) => p.type !== 'forum50' && p.type !== 'forumfree')
+  const forum = prizes.filter(isForum)
+  const others = prizes.filter((p) => !isForum(p))
   const picked = [...forum, ...others.slice(0, Math.max(0, MAX_SEGMENTS - forum.length))].slice(0, MAX_SEGMENTS)
   if (target && !picked.some((p) => p.name === target.name)) {
     picked[picked.length - 1] = target
   }
   // Xen kẽ: rải đều giải Forum giữa các quà khác.
-  const forumPicked = picked.filter((p) => p.type === 'forum50' || p.type === 'forumfree')
+  const forumPicked = picked.filter(isForum)
   const rest = picked.filter((p) => !forumPicked.includes(p))
   const step = forumPicked.length ? Math.ceil(picked.length / forumPicked.length) : Infinity
   const mixed = []
@@ -41,8 +43,9 @@ export function buildSegments(prizes, target) {
 
 // Nhãn ngắn, chữ lớn trên vòng quay (tối đa 2 dòng); tên đầy đủ vẫn hiện ở màn kết quả.
 function labelLines(p, maxChars) {
-  if (p.type === 'forum50') return ['VOUCHER 50%', 'VÉ FORUM']
   if (p.type === 'forumfree') return ['VÉ FORUM', 'MIỄN PHÍ']
+  const pct = /^forum(\d+)$/.exec(p.type) // forum50, forum30… → "VOUCHER 50%"
+  if (pct) return [`VOUCHER ${pct[1]}%`, 'VÉ FORUM']
   const words = p.name.split(/\s+/)
   const lines = ['']
   words.forEach((w) => {

@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion'
 
-const FORUM_TYPES = ['forum50', 'forumfree']
 
 export default function ResultCard({ prize, code, alreadyPlayed, email, onAgain }) {
-  const isForum = FORUM_TYPES.includes(prize.type)
+  const isForum = String(prize.type).startsWith('forum') // forum50, forum30, forumfree… đều do BTC gửi mã qua email
   return (
     <motion.div
       initial={{ scale: 0.6, opacity: 0 }}

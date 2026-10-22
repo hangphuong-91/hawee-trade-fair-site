@@ -63,3 +63,20 @@ Trang `https://giaothuongquocte.hawee.vn/luckydraw` dùng **chung Web App URL** 
 - Mỗi email quay 1 lần (quay lại → hiện kết quả cũ); email khác quay được lần mới. Không giới hạn theo SĐT.
 - Tab **"Quay số - Người chơi"**: nhân viên tick cột "Đã nhận" khi trao quà; File → Download → .xlsx để lấy bản Excel.
 - Link QR: `https://giaothuongquocte.hawee.vn/luckydraw?src=<vị-trí>` (vd. `?src=cong`, `?src=pavilion`).
+
+## Voucher mua sắm 500.000đ (`/voucher`) — v17
+
+Dùng **chung Web App URL** với quay số. Hai trang:
+- `https://giaothuongquocte.hawee.vn/voucher` — khách điền form → nhận 1 voucher (mã `VC-XXXXXX` + QR). Tối đa 50 voucher (`VC_TOTAL`); mỗi email / SĐT / thiết bị 1 voucher.
+- `https://giaothuongquocte.hawee.vn/voucher/use` — gian hàng quét QR bằng camera điện thoại là mở trang này → nhập **Mã gian hàng** → bấm xác nhận. Hệ thống ghi gian + giờ, mỗi voucher dùng 1 lần. Không quét được QR thì mở thẳng link này, nhập tay mã voucher + 4 số cuối SĐT của khách.
+
+**Cài đặt (làm 1 lần sau khi dán `Code.gs` mới):**
+1. Dán `Code.gs` mới → Lưu → chọn hàm `testVoucher` → **Run**. Hàm tạo 2 tab **"Voucher - Khách nhận"** và **"Voucher - Gian hàng"** (kèm 1 gian test mã `TEST01`). Xoá dòng test ở cả 2 tab sau đó.
+2. Tab **"Voucher - Gian hàng"**: điền tên từng gian ở cột A → chạy hàm `vcFillBoothCodes` → cột B tự có mã 6 ký tự. Gửi riêng mã cho từng gian (gian tự giữ mã, nhập sai gian khác thì HAWEE không chịu trách nhiệm).
+3. **Manage deployments → Edit → New version**.
+
+**Vận hành / đối soát:**
+- Tab "Voucher - Khách nhận": cột Trạng thái (`Chưa sử dụng` / `Đã sử dụng` / `Hết voucher`), Gian hàng sử dụng, Mã gian hàng, Thời gian sử dụng. Lọc theo gian hàng để thanh toán 500.000đ / voucher.
+- Đổi tổng số voucher: sửa `VC_TOTAL`. Đổi hạn dùng: sửa `VC_EXPIRES` (mặc định 23:59 24/10/2026). Sửa xong phải New version.
+- Cột "Mã bảo mật QR" là bí mật nằm trong QR — không chia sẻ tab này ra ngoài.
+- Link QR quầy: `https://giaothuongquocte.hawee.vn/voucher?src=<vị-trí>`.

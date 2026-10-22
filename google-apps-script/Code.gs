@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v16-2026-10-22-luckydraw-device-limit';
+var CODE_VERSION = 'v17-2026-10-22-voucher';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -68,6 +68,28 @@ var LD_SAMPLE_PRIZES = [
   ['Vé tham dự HAWEE Leaders Forum 2026 (miễn phí)', 'forumfree', 'Mã vé gửi qua email', 5, 1, true],
   ['Quà tặng từ gian hàng (cập nhật)', 'booth', 'HAWEE Pavilion', 500, 30, true],
 ];
+
+// ===== Voucher mua hàng 500.000đ (/voucher) =====
+// Khách nhận voucher (mỗi thiết bị / SĐT / email 1 voucher, tối đa VC_TOTAL) → màn hình có QR.
+// Gian hàng quét QR → trang /voucher/use → nhập Mã gian hàng → hệ thống ghi gian + giờ sử dụng, mỗi mã dùng 1 lần.
+var SHEET_VC = 'Voucher - Khách nhận';
+var SHEET_VC_BOOTHS = 'Voucher - Gian hàng';
+var VC_FORM_SOURCE = 'voucher';
+var VC_REDEEM_SOURCE = 'voucher_redeem';
+var VC_TOTAL = 50;
+var VC_EXPIRES = new Date('2026-10-24T23:59:59+07:00'); // sau mốc này gian hàng không xác nhận được nữa
+var VC_USED = 'Đã sử dụng';
+var VC_NO_LEFT = 'Hết voucher'; // khách đăng ký lúc đã phát đủ — vẫn ghi lại data, không có mã
+
+var HEADERS_VC = [
+  'Thời gian nhận', 'Họ & Tên', 'Chức vụ', 'Công ty', 'Số điện thoại', 'Email', 'Mã voucher', 'Mã bảo mật QR',
+  'Mã thiết bị', 'Nguồn', 'Ghi chú bảo mật', 'Trạng thái', 'Gian hàng sử dụng', 'Mã gian hàng', 'Thời gian sử dụng',
+];
+// Vị trí cột (đếm từ 1) trong tab Khách nhận.
+var VC_COL = { name: 2, phone: 5, email: 6, code: 7, token: 8, device: 9, status: 12, booth: 13, boothCode: 14, usedAt: 15 };
+
+// Tab Gian hàng: BTC điền tên gian ở cột A, chạy vcFillBoothCodes() để sinh mã cho từng gian rồi gửi riêng cho gian đó.
+var HEADERS_VC_BOOTHS = ['Tên gian hàng', 'Mã gian hàng', 'Ghi chú'];
 
 var HEADERS_GIAN_HANG = [
   'Thời gian',
@@ -207,6 +229,13 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // Gian hàng xác nhận voucher: không qua reCAPTCHA (điểm thấp sẽ chặn nhầm nhân viên đang đứng quầy);
+    // đã được bảo vệ bằng Mã gian hàng + mã bảo mật trong QR.
+    if (data.form_source === VC_REDEEM_SOURCE) {
+      return ContentService.createTextOutput(JSON.stringify(handleVoucherRedeem(data)))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     if (data[HONEYPOT_FIELD]) {
       logRejected(data, 'honeypot');
       result = { result: 'error', error: 'rejected' };
@@ -223,6 +252,11 @@ function doPost(e) {
 
     if (data.form_source === LD_FORM_SOURCE) {
       return ContentService.createTextOutput(JSON.stringify(handleLuckyDraw(data, recaptcha)))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.form_source === VC_FORM_SOURCE) {
+      return ContentService.createTextOutput(JSON.stringify(handleVoucherClaim(data, recaptcha)))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -273,8 +307,14 @@ function doPost(e) {
 function doGet(e) {
   var out = { result: 'success', version: CODE_VERSION };
   try {
-    if (e && e.parameter && e.parameter.action === 'luckydraw_prizes') {
+    var p = (e && e.parameter) || {};
+    if (p.action === 'luckydraw_prizes') {
       out.prizes = ldWheelPrizes();
+    } else if (p.action === 'voucher_status') {
+      out.voucher = vcStatus(p.code, p.t);
+    } else if (p.action === 'voucher_booth') {
+      var booth = vcFindBooth(p.b);
+      out.booth = booth ? booth.name : null;
     }
   } catch (err) {
     out = { result: 'error', error: err.toString() };
@@ -579,4 +619,199 @@ function ldTestEmailCheck() {
   Logger.log('DNS gmail.com: HTTP ' + resp.getResponseCode());
   Logger.log('gmail.com hợp lệ? ' + ldEmailDomainOk('a@gmail.com'));
   Logger.log('khongtontai-xyz-hawee.com hợp lệ? ' + ldEmailDomainOk('a@khongtontai-xyz-hawee.com'));
+}
+
+// ===== Voucher mua hàng 500.000đ =====
+
+function vcSheet() {
+  return getOrCreateSheet(SHEET_VC, HEADERS_VC);
+}
+
+function vcBoothSheet() {
+  return getOrCreateSheet(SHEET_VC_BOOTHS, HEADERS_VC_BOOTHS);
+}
+
+// Mã voucher dạng VC-7KQ2MX (in trên màn hình khách), khác tiền tố HW- của quay số để gian hàng không nhầm.
+function vcNewCode(existing) {
+  for (var tries = 0; tries < 50; tries++) {
+    var c = 'VC-';
+    for (var i = 0; i < 6; i++) c += LD_CODE_ALPHABET.charAt(Math.floor(Math.random() * LD_CODE_ALPHABET.length));
+    if (existing.indexOf(c) === -1) return c;
+  }
+  return 'VC-' + Date.now().toString(36).toUpperCase();
+}
+
+// Toàn bộ dòng tab Khách nhận (không gồm tiêu đề).
+function vcRows(sheet) {
+  var last = sheet.getLastRow();
+  return last < 2 ? [] : sheet.getRange(2, 1, last - 1, HEADERS_VC.length).getValues();
+}
+
+// SĐT dạng 090****123 — đủ để gian hàng đối chiếu với khách, không lộ cả số.
+function vcMaskPhone(phone) {
+  var p = String(phone || '').replace(/[^\d]/g, ''); // bỏ dấu ' của forceText nếu có
+  return p.length >= 6 ? p.slice(0, 3) + '****' + p.slice(-3) : p;
+}
+
+function vcIso(value) {
+  return value instanceof Date ? value.toISOString() : '';
+}
+
+// Khách nhận voucher. Mỗi email / SĐT / thiết bị 1 voucher — trùng → trả lại voucher cũ.
+function handleVoucherClaim(data, recaptcha) {
+  var email = String(data.email || '').trim().toLowerCase();
+  var name = String(data.contact_name || '').trim();
+  var phone = ldNormalizePhone(data.phone);
+  var device = String(data.device_id || '').replace(/[^\w-]/g, '').slice(0, 64);
+  if (!name || !ldValidEmail(email)) return { result: 'error', error: 'invalid_input' };
+  if (!phone) return { result: 'error', error: 'invalid_phone' };
+  if (!ldEmailDomainOk(email)) return { result: 'error', error: 'invalid_email' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sheet = vcSheet();
+    var rows = vcRows(sheet);
+    var codes = [];
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (!r[VC_COL.code - 1]) continue; // dòng "Hết voucher" không tính
+      codes.push(String(r[VC_COL.code - 1]));
+      var sameEmail = String(r[VC_COL.email - 1]).trim().toLowerCase() === email;
+      var samePhone = ldNormalizePhone(r[VC_COL.phone - 1]) === phone;
+      var sameDevice = !!device && String(r[VC_COL.device - 1]) === device;
+      if (sameEmail || samePhone || sameDevice) {
+        return {
+          result: 'success', version: CODE_VERSION, already_claimed: true,
+          code: String(r[VC_COL.code - 1]), token: String(r[VC_COL.token - 1]), name: String(r[VC_COL.name - 1]),
+        };
+      }
+    }
+
+    var left = codes.length < VC_TOTAL;
+    var code = left ? vcNewCode(codes) : '';
+    var token = left ? Utilities.getUuid().replace(/-/g, '') : '';
+    sheet.appendRow([
+      new Date(), sanitizeCell(name), sanitizeCell(data.job_title), sanitizeCell(data.company), forceText(phone),
+      sanitizeCell(email), code, token, device, sanitizeCell(data.src), sanitizeCell(recaptcha.note),
+      left ? 'Chưa sử dụng' : VC_NO_LEFT, '', '', '',
+    ]);
+    if (!left) return { result: 'error', error: 'no_voucher_left', version: CODE_VERSION };
+    return { result: 'success', version: CODE_VERSION, already_claimed: false, code: code, token: token, name: name };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function vcFindBooth(boothCode) {
+  var b = String(boothCode || '').trim().toUpperCase();
+  if (!b) return null;
+  var sheet = vcBoothSheet();
+  var last = sheet.getLastRow();
+  if (last < 2) return null;
+  var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i][0] && String(rows[i][1]).trim().toUpperCase() === b) return { name: String(rows[i][0]), code: b };
+  }
+  return null;
+}
+
+// Tìm voucher theo mã + mã bảo mật QR (token), hoặc mã + 4 số cuối SĐT khi gian hàng nhập tay.
+function vcFind(rows, code, token, phone4) {
+  var c = String(code || '').trim().toUpperCase();
+  if (!c) return -1;
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i][VC_COL.code - 1]) !== c) continue;
+    var tokenOk = !!token && String(rows[i][VC_COL.token - 1]) === String(token);
+    var phoneOk = /^\d{4}$/.test(String(phone4 || '')) && String(rows[i][VC_COL.phone - 1]).slice(-4) === String(phone4);
+    return tokenOk || phoneOk ? i : -1;
+  }
+  return -1;
+}
+
+function vcPublic(row) {
+  var used = String(row[VC_COL.status - 1]) === VC_USED;
+  return {
+    code: String(row[VC_COL.code - 1]),
+    name: String(row[VC_COL.name - 1]),
+    phone: vcMaskPhone(row[VC_COL.phone - 1]),
+    used: used,
+    booth: used ? String(row[VC_COL.booth - 1]) : '',
+    used_at: used ? vcIso(row[VC_COL.usedAt - 1]) : '',
+    expires_at: VC_EXPIRES.toISOString(),
+  };
+}
+
+// Trạng thái voucher cho màn hình khách và trang gian hàng. Sai mã / sai token → null.
+function vcStatus(code, token) {
+  var rows = vcRows(vcSheet());
+  var i = vcFind(rows, code, token, '');
+  return i === -1 ? null : vcPublic(rows[i]);
+}
+
+// Gian hàng xác nhận sử dụng. Mã gian hàng đúng → ghi gian + giờ; mỗi voucher chỉ dùng 1 lần.
+function handleVoucherRedeem(data) {
+  var booth = vcFindBooth(data.booth_code);
+  if (!booth) return { result: 'error', error: 'invalid_booth', version: CODE_VERSION };
+  if (new Date() > VC_EXPIRES) return { result: 'error', error: 'expired', version: CODE_VERSION };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sheet = vcSheet();
+    var rows = vcRows(sheet);
+    var i = vcFind(rows, data.code, data.token, data.phone4);
+    if (i === -1) return { result: 'error', error: 'not_found', version: CODE_VERSION };
+    if (String(rows[i][VC_COL.status - 1]) === VC_USED) {
+      return { result: 'error', error: 'already_used', voucher: vcPublic(rows[i]), version: CODE_VERSION };
+    }
+    var now = new Date();
+    sheet.getRange(i + 2, VC_COL.status, 1, 4).setValues([[VC_USED, booth.name, booth.code, now]]);
+    rows[i][VC_COL.status - 1] = VC_USED;
+    rows[i][VC_COL.booth - 1] = booth.name;
+    rows[i][VC_COL.usedAt - 1] = now;
+    return { result: 'success', version: CODE_VERSION, voucher: vcPublic(rows[i]) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Chạy trong editor sau khi điền tên gian hàng ở cột A tab "Voucher - Gian hàng": sinh Mã gian hàng cho dòng còn trống. */
+function vcFillBoothCodes() {
+  var sheet = vcBoothSheet();
+  var last = sheet.getLastRow();
+  if (last < 2) {
+    Logger.log('Tab "' + SHEET_VC_BOOTHS + '" chưa có gian hàng nào — điền tên gian ở cột A rồi chạy lại.');
+    return;
+  }
+  var range = sheet.getRange(2, 1, last - 1, 2);
+  var rows = range.getValues();
+  var used = rows.map(function (r) { return String(r[1]).trim().toUpperCase(); });
+  var added = 0;
+  for (var i = 0; i < rows.length; i++) {
+    if (!rows[i][0] || rows[i][1]) continue;
+    var c;
+    do {
+      c = '';
+      for (var k = 0; k < 6; k++) c += LD_CODE_ALPHABET.charAt(Math.floor(Math.random() * LD_CODE_ALPHABET.length));
+    } while (used.indexOf(c) !== -1);
+    used.push(c);
+    rows[i][1] = c;
+    added++;
+  }
+  range.setValues(rows);
+  Logger.log('Đã sinh ' + added + ' mã gian hàng.');
+}
+
+/** Chạy thử trong editor: tạo 2 tab Voucher, 1 gian hàng test, nhận + dùng 1 voucher mẫu. Xoá dòng test sau đó. */
+function testVoucher() {
+  var booths = vcBoothSheet();
+  if (!vcFindBooth('TEST01')) booths.appendRow(['Gian hàng TEST (xoá sau)', 'TEST01', 'Dòng test từ testVoucher()']);
+  var claim = handleVoucherClaim({
+    contact_name: 'Test Voucher', job_title: 'Giám đốc', company: 'Công ty Test',
+    phone: '09' + String(Date.now()).slice(-8), email: 'test+' + Date.now() + '@example.com', src: 'test',
+  }, { verified: false, note: 'Dòng test từ testVoucher()' });
+  Logger.log('Nhận: ' + JSON.stringify(claim));
+  Logger.log('Dùng lần 1: ' + JSON.stringify(handleVoucherRedeem({ code: claim.code, token: claim.token, booth_code: 'test01' })));
+  Logger.log('Dùng lần 2 (phải báo already_used): ' + JSON.stringify(handleVoucherRedeem({ code: claim.code, token: claim.token, booth_code: 'TEST01' })));
 }

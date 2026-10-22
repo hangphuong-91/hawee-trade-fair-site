@@ -37,7 +37,9 @@ function validate(v) {
   return errors
 }
 
-export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
+const DEFAULT_CONSENT = 'Tôi đồng ý để HAWEE lưu thông tin này nhằm trao quà và liên hệ gửi mã ưu đãi.'
+
+export default function DrawForm({ onSubmit, busy, errorMessage, initial, submitLabel = 'Vào vòng quay', consent = DEFAULT_CONSENT }) {
   const [values, setValues] = useState(initial || {})
   const [errors, setErrors] = useState({})
   const [agree, setAgree] = useState(true)
@@ -90,7 +92,7 @@ export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
       ))}
       <label className="flex items-start gap-3 text-xs text-white/70">
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#C9187F]" />
-        <span>Tôi đồng ý để HAWEE lưu thông tin này nhằm trao quà và liên hệ gửi mã ưu đãi.</span>
+        <span>{consent}</span>
       </label>
       {errors.agree && <p className="text-xs text-[#FEB12E]">{errors.agree}</p>}
       {errorMessage && <p className="rounded-lg bg-black/30 p-3 text-sm text-[#FEB12E]">{errorMessage}</p>}
@@ -104,7 +106,7 @@ export default function DrawForm({ onSubmit, busy, errorMessage, initial }) {
         disabled={busy}
         className="w-full rounded-full bg-gradient-to-r from-[#FEB12E] to-[#E8593A] py-4 text-lg font-bold text-[#50002F] shadow-lg transition active:scale-95 disabled:opacity-60"
       >
-        {busy ? 'Đang xử lý…' : 'Vào vòng quay'}
+        {busy ? 'Đang xử lý…' : submitLabel}
       </button>
     </form>
   )

@@ -571,3 +571,12 @@ function testAppendRowDirectly() {
   //  Sản phẩm trưng bày, Ghi chú bảo mật)
   Logger.log('Đã ghi 1 dòng test vào sheet "' + SHEET_GIAN_HANG + '"');
 }
+
+// Chạy thủ công 1 lần trong editor (chọn hàm này → Run) để cấp quyền gọi DNS và kiểm tra bước xác minh email.
+function ldTestEmailCheck() {
+  CacheService.getScriptCache().removeAll(['ld_mx_khongtontai-xyz-hawee.com', 'ld_mx_gmail.com']);
+  var resp = UrlFetchApp.fetch('https://dns.google/resolve?name=gmail.com&type=MX', { muteHttpExceptions: true });
+  Logger.log('DNS gmail.com: HTTP ' + resp.getResponseCode());
+  Logger.log('gmail.com hợp lệ? ' + ldEmailDomainOk('a@gmail.com'));
+  Logger.log('khongtontai-xyz-hawee.com hợp lệ? ' + ldEmailDomainOk('a@khongtontai-xyz-hawee.com'));
+}

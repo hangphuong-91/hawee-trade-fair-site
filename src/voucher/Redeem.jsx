@@ -5,10 +5,13 @@ import { fetchVoucherStatus, getSavedBooth, lookupBooth, redeemVoucher, saveBoot
 
 const ERRORS = {
   offline: 'Mất kết nối tới hệ thống. Kiểm tra mạng rồi bấm xác nhận lại.',
-  invalid_booth: 'Mã gian hàng không đúng. Vui lòng kiểm tra lại mã HAWEE đã gửi cho gian hàng.',
+  invalid_booth: 'Không tìm thấy số gian này trong HAWEE Pavilion. Vui lòng kiểm tra lại (vd. A 12).',
   not_found: 'Không tìm thấy voucher. Kiểm tra lại mã voucher và 4 số cuối điện thoại của khách.',
   expired: 'Voucher đã hết hạn sử dụng.',
 }
+
+// Số gian nhập kiểu nào cũng được: "A12", "a 12", "A 12".
+const boothKey = (v) => String(v || '').replace(/\s+/g, '').toUpperCase()
 
 const input =
   'w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none focus:border-[#FEB12E]'
@@ -45,8 +48,8 @@ export default function Redeem() {
   }, [])
 
   const checkBooth = async () => {
-    const b = boothInput.trim().toUpperCase()
-    if (!b || b === booth?.code) return
+    const b = boothKey(boothInput)
+    if (!b || b === boothKey(booth?.code)) return
     setBooth(null)
     setBoothError('')
     setCheckingBooth(true)
@@ -172,17 +175,17 @@ export default function Redeem() {
             <>
               <label className="block">
                 <span className="mb-1 flex items-center gap-2 text-sm font-semibold text-[#FFD4E5]">
-                  <Store className="h-4 w-4" /> Mã gian hàng
+                  <Store className="h-4 w-4" /> Mã gian hàng (số gian)
                 </span>
                 <input
                   value={boothInput}
                   onChange={(e) => {
                     setBoothInput(e.target.value)
-                    if (booth && e.target.value.trim().toUpperCase() !== booth.code) setBooth(null)
+                    if (booth && boothKey(e.target.value) !== boothKey(booth.code)) setBooth(null)
                   }}
                   onBlur={checkBooth}
                   autoCapitalize="characters"
-                  placeholder="Mã HAWEE cấp cho gian hàng"
+                  placeholder="Số gian, vd. A 12"
                   className={`${input} font-mono uppercase`}
                 />
                 {checkingBooth && <span className="mt-1 block text-xs text-white/70">Đang kiểm tra mã gian hàng…</span>}

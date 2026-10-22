@@ -88,7 +88,7 @@ var HEADERS_VC = [
 // Vị trí cột (đếm từ 1) trong tab Khách nhận.
 var VC_COL = { name: 2, phone: 5, email: 6, code: 7, token: 8, device: 9, status: 12, booth: 13, boothCode: 14, usedAt: 15 };
 
-// Tab Gian hàng: BTC điền tên gian ở cột A, chạy vcFillBoothCodes() để sinh mã cho từng gian rồi gửi riêng cho gian đó.
+// Tab Gian hàng: cột A tên doanh nghiệp, cột B số gian (vd. A 12) — gian hàng nhập số gian của mình khi xác nhận.
 var HEADERS_VC_BOOTHS = ['Tên gian hàng', 'Mã gian hàng', 'Ghi chú'];
 
 var HEADERS_GIAN_HANG = [
@@ -703,15 +703,20 @@ function handleVoucherClaim(data, recaptcha) {
   }
 }
 
+// Mã gian hàng = số gian (vd. "A 12"); bỏ khoảng trắng khi so để "A12", "a 12" đều khớp.
+function vcBoothKey(value) {
+  return String(value || '').replace(/\s+/g, '').toUpperCase();
+}
+
 function vcFindBooth(boothCode) {
-  var b = String(boothCode || '').trim().toUpperCase();
+  var b = vcBoothKey(boothCode);
   if (!b) return null;
   var sheet = vcBoothSheet();
   var last = sheet.getLastRow();
   if (last < 2) return null;
   var rows = sheet.getRange(2, 1, last - 1, 2).getValues();
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i][0] && String(rows[i][1]).trim().toUpperCase() === b) return { name: String(rows[i][0]), code: b };
+    if (rows[i][0] && vcBoothKey(rows[i][1]) === b) return { name: String(rows[i][0]), code: String(rows[i][1]).trim() };
   }
   return null;
 }

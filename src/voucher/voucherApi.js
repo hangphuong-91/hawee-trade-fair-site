@@ -74,7 +74,8 @@ export async function claimVoucher(fields) {
     payload.recaptcha_token = null
   }
   const json = await request(null, payload)
-  if (json.result !== 'success') throw fail(json.error || 'offline')
+  // Thiếu mã = Apps Script chưa lên bản có voucher (bản cũ coi đây là form đăng ký gian hàng) → báo bận.
+  if (json.result !== 'success' || !json.code) throw fail(json.error || 'offline')
   const voucher = { code: json.code, token: json.token, name: json.name, alreadyClaimed: !!json.already_claimed }
   writeStore(VOUCHER_KEY, { ...voucher, alreadyClaimed: true })
   return voucher
@@ -97,6 +98,6 @@ export async function lookupBooth(boothCode) {
 // Gian hàng xác nhận sử dụng. Có token (quét QR) hoặc phone4 (nhập tay). Lỗi: invalid_booth | not_found | already_used | expired | offline.
 export async function redeemVoucher({ code, token, phone4, boothCode }) {
   const json = await request(null, { form_source: 'voucher_redeem', code, token, phone4, booth_code: boothCode })
-  if (json.result !== 'success') throw fail(json.error || 'offline', { voucher: json.voucher })
+  if (json.result !== 'success' || !json.voucher) throw fail(json.error || 'offline', { voucher: json.voucher })
   return json.voucher
 }

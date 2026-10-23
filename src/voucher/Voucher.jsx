@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarClock, Store, Ticket } from 'lucide-react'
+import { CalendarClock, Clock, Store, Ticket } from 'lucide-react'
 import DrawForm from '../luckydraw/DrawForm'
 import VoucherCard from './VoucherCard'
 import VoucherShell, { panel } from './VoucherShell'
@@ -11,8 +11,12 @@ const MESSAGES = {
   invalid_input: 'Thông tin chưa hợp lệ, vui lòng kiểm tra lại.',
   invalid_phone: 'Số điện thoại chưa đúng. Vui lòng nhập số di động Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09).',
   invalid_email: 'Email này không nhận được thư. Vui lòng nhập email bạn đang dùng.',
+  paused: 'Voucher hôm nay đã được nhận hết. Hệ thống mở lại lúc 9:00 sáng 24/10, mời bạn quay lại nhé!',
   recaptcha_failed: 'Hệ thống chưa xác minh được trình duyệt của bạn. Vui lòng tải lại trang và thử lại.',
 }
+
+// Tạm khoá phát voucher mới tới 9:00 24/10 (phát hiện gian lận 23/10) — khớp VC_PAUSED_UNTIL trong Code.gs.
+const PAUSED_UNTIL = new Date('2026-10-24T09:00:00+07:00').getTime()
 
 const PERKS = [
   { icon: Ticket, text: 'Chỉ 50 suất' },
@@ -55,9 +59,18 @@ export default function Voucher() {
   const [fields, setFields] = useState(null)
   const src = new URLSearchParams(window.location.search).get('src') || ''
 
+  const [paused, setPaused] = useState(() => Date.now() < PAUSED_UNTIL)
+
   useEffect(() => {
     document.title = 'Nhận voucher 500.000đ — HAWEE Pavilion'
   }, [])
+
+  // Trang đang mở lúc 9:00 → tự mở lại form, không cần tải lại.
+  useEffect(() => {
+    if (!paused) return
+    const t = setTimeout(() => setPaused(false), Math.min(PAUSED_UNTIL - Date.now(), 2 ** 31 - 1))
+    return () => clearTimeout(t)
+  }, [paused])
 
   const onSubmit = async (values) => {
     setFields(values)
@@ -67,7 +80,8 @@ export default function Voucher() {
       setVoucher(await claimVoucher({ ...values, src }))
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
-      setError(MESSAGES[err.code] || MESSAGES.offline)
+      if (err.code === 'paused') setPaused(true)
+      else setError(MESSAGES[err.code] || MESSAGES.offline)
     } finally {
       setBusy(false)
     }
@@ -77,6 +91,22 @@ export default function Voucher() {
     return (
       <VoucherShell eyebrow="HAWEE Pavilion · WTC Expo" title="Voucher của bạn">
         <VoucherCard voucher={voucher} />
+      </VoucherShell>
+    )
+  }
+
+  if (paused) {
+    return (
+      <VoucherShell hero={<Hero />}>
+        <div className={`${panel} text-center`}>
+          <Clock className="mx-auto h-12 w-12 text-[#FFC83D]" strokeWidth={2.2} />
+          <p className="vc-display mt-3 text-[22px] leading-tight">Voucher hôm nay đã hết</p>
+          <p className="mt-3 text-[15px] leading-relaxed text-white/90">
+            Hệ thống sẽ mở lại lúc <b className="text-[#FFC83D]">9:00 sáng thứ Sáu, 24/10</b>. Mời bạn quay lại trang này để nhận
+            voucher 500.000đ nhé!
+          </p>
+          <p className="mt-4 text-[13px] text-white/70">Đã nhận voucher? Mở lại trang này trên đúng điện thoại đã nhận để xem mã QR.</p>
+        </div>
       </VoucherShell>
     )
   }

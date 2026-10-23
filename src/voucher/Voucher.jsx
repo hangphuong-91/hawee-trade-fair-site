@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarClock, Clock, Store, Ticket } from 'lucide-react'
+import { CalendarClock, Clock, PartyPopper, Store, Ticket } from 'lucide-react'
 import DrawForm from '../luckydraw/DrawForm'
 import VoucherCard from './VoucherCard'
 import VoucherShell, { panel } from './VoucherShell'
@@ -11,7 +11,7 @@ const MESSAGES = {
   invalid_input: 'Thông tin chưa hợp lệ, vui lòng kiểm tra lại.',
   invalid_phone: 'Số điện thoại chưa đúng. Vui lòng nhập số di động Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09).',
   invalid_email: 'Email này không nhận được thư. Vui lòng nhập email bạn đang dùng.',
-  paused: 'Voucher hôm nay đã được nhận hết. Hệ thống mở lại lúc 9:00 sáng 24/10, mời bạn quay lại nhé!',
+  paused: 'Tiếc quá, voucher hôm nay đã được nhận hết rồi! Hẹn bạn 9:00 sáng thứ Bảy 24/10 nhé!',
   recaptcha_failed: 'Hệ thống chưa xác minh được trình duyệt của bạn. Vui lòng tải lại trang và thử lại.',
 }
 
@@ -99,11 +99,18 @@ export default function Voucher() {
     return (
       <VoucherShell hero={<Hero />}>
         <div className={`${panel} text-center`}>
-          <Clock className="mx-auto h-12 w-12 text-[#FFC83D]" strokeWidth={2.2} />
-          <p className="vc-display mt-3 text-[22px] leading-tight">Voucher hôm nay đã hết</p>
+          <PartyPopper className="mx-auto h-12 w-12 text-[#FFC83D]" strokeWidth={2.2} />
+          <p className="vc-display mt-3 text-[22px] leading-tight">Tiếc quá! Voucher hôm nay đã được nhận hết rồi</p>
           <p className="mt-3 text-[15px] leading-relaxed text-white/90">
-            Hệ thống sẽ mở lại lúc <b className="text-[#FFC83D]">9:00 sáng thứ Sáu, 24/10</b>. Mời bạn quay lại trang này để nhận
-            voucher 500.000đ nhé!
+            Thật là một ngày mua sắm sôi động tại <b className="text-[#FFC83D]">HAWEE Pavilion</b> — cảm ơn bạn đã ghé thăm và
+            ủng hộ hàng Việt!
+          </p>
+          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full border border-[#FFC83D]/60 bg-black/25 px-4 py-2 text-[14px] font-bold">
+            <Clock className="h-4 w-4 text-[#FFC83D]" /> Voucher mới mở lại lúc 9:00 sáng thứ Bảy, 24/10
+          </p>
+          <p className="mt-3 text-[15px] leading-relaxed text-white/90">
+            Đặt báo thức và quay lại thật sớm nhé — số lượng có hạn, ai nhanh tay người ấy có quà. Hẹn gặp bạn ngày mai tại WTC
+            Expo! 🎉
           </p>
           <p className="mt-4 text-[13px] text-white/70">Đã nhận voucher? Mở lại trang này trên đúng điện thoại đã nhận để xem mã QR.</p>
         </div>

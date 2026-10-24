@@ -67,7 +67,7 @@ Trang `https://giaothuongquocte.hawee.vn/luckydraw` dùng **chung Web App URL** 
 ## Voucher mua sắm 500.000đ (`/voucher`) — v17
 
 Dùng **chung Web App URL** với quay số. Hai trang:
-- `https://giaothuongquocte.hawee.vn/voucher` — khách điền form → nhận 1 voucher (mã `VC-XXXXXX` + QR). Tối đa 83 voucher (`VC_TOTAL`); mỗi email / SĐT / thiết bị 1 voucher.
+- `https://giaothuongquocte.hawee.vn/voucher` — khách điền form → nhận 1 voucher (mã `VC-XXXXXX` + QR). Tối đa 85 voucher (`VC_TOTAL`); mỗi email / SĐT / thiết bị 1 voucher.
 - `https://giaothuongquocte.hawee.vn/voucher/use` — gian hàng quét QR bằng camera điện thoại là mở trang này → nhập **Mã gian hàng** → bấm xác nhận. Hệ thống ghi gian + giờ, mỗi voucher dùng 1 lần. Không quét được QR thì mở thẳng link này, nhập tay mã voucher + 4 số cuối SĐT của khách.
 
 **Cài đặt (làm 1 lần sau khi dán `Code.gs` mới):**

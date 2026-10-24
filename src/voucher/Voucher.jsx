@@ -7,7 +7,7 @@ import { claimVoucher, getSavedVoucher } from './voucherApi'
 
 const MESSAGES = {
   offline: 'Hệ thống đang bận, vui lòng thử lại sau ít phút.',
-  no_voucher_left: 'Rất tiếc, 80 voucher đã được nhận hết. Cảm ơn bạn đã quan tâm đến HAWEE Pavilion!',
+  no_voucher_left: 'Rất tiếc, 50 voucher đã được nhận hết. Cảm ơn bạn đã quan tâm đến HAWEE Pavilion!',
   invalid_input: 'Thông tin chưa hợp lệ, vui lòng kiểm tra lại.',
   invalid_phone: 'Số điện thoại chưa đúng. Vui lòng nhập số di động Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09).',
   invalid_email: 'Email này không nhận được thư. Vui lòng nhập email bạn đang dùng.',
@@ -19,7 +19,7 @@ const MESSAGES = {
 const PAUSED_UNTIL = new Date('2026-10-24T09:00:00+07:00').getTime()
 
 const PERKS = [
-  { icon: Ticket, text: 'Chỉ 80 suất' },
+  { icon: Ticket, text: 'Chỉ 50 suất' },
   { icon: Store, text: '56 gian hàng' },
   { icon: CalendarClock, text: 'Dùng đến 24.10' },
 ]

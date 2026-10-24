@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v21-2026-10-24-voucher-85';
+var CODE_VERSION = 'v22-2026-10-24-voucher-closed';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -76,6 +76,7 @@ var SHEET_VC = 'Voucher - Khách nhận';
 var SHEET_VC_BOOTHS = 'Voucher - Gian hàng';
 var VC_FORM_SOURCE = 'voucher';
 var VC_REDEEM_SOURCE = 'voucher_redeem';
+var VC_CLOSED = true; // voucher program closed: no new claims, no redemptions
 var VC_TOTAL = 85; // nội bộ: thực phát 85, trang công khai vẫn ghi 50 suất
 var VC_EXPIRES = new Date('2026-10-24T23:59:59+07:00'); // sau mốc này gian hàng không xác nhận được nữa
 var VC_PAUSED_UNTIL = new Date('2026-10-24T09:00:00+07:00'); // tạm khoá phát voucher mới (phát hiện gian lận 23/10); voucher đã phát vẫn xem/dùng được
@@ -660,6 +661,7 @@ function vcIso(value) {
 
 // Khách nhận voucher. Mỗi email / SĐT / thiết bị 1 voucher — trùng → trả lại voucher cũ.
 function handleVoucherClaim(data, recaptcha) {
+  if (VC_CLOSED) return { result: 'error', error: 'closed', version: CODE_VERSION };
   var email = String(data.email || '').trim().toLowerCase();
   var name = String(data.contact_name || '').trim();
   var phone = ldNormalizePhone(data.phone);
@@ -759,6 +761,7 @@ function vcStatus(code, token) {
 
 // Gian hàng xác nhận sử dụng. Mã gian hàng đúng → ghi gian + giờ; mỗi voucher chỉ dùng 1 lần.
 function handleVoucherRedeem(data) {
+  if (VC_CLOSED) return { result: 'error', error: 'closed', version: CODE_VERSION };
   var booth = vcFindBooth(data.booth_code);
   if (!booth) return { result: 'error', error: 'invalid_booth', version: CODE_VERSION };
   if (new Date() > VC_EXPIRES) return { result: 'error', error: 'expired', version: CODE_VERSION };

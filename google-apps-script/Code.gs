@@ -8,7 +8,7 @@ var SPREADSHEET_ID = '1njlgjdF50IYZQEaapLYxyCk6zqyHjPJqOhxdHZoZSDc';
 
 // Đánh dấu phiên bản — dùng để xác nhận deployment đang chạy đúng code mới nhất
 // (kiểm tra bằng cách xem field "version" trong response JSON trả về).
-var CODE_VERSION = 'v19-2026-10-24-voucher-80';
+var CODE_VERSION = 'v20-2026-10-24-voucher-83';
 
 // Secret key reCAPTCHA v3 + admin key cho action bảo trì (fix_headers) — KHÔNG hardcode trong source
 // nữa (file này nằm trong git repo, hardcode secret ở đây là rò rỉ tiềm ẩn nếu repo có remote/được
@@ -76,7 +76,7 @@ var SHEET_VC = 'Voucher - Khách nhận';
 var SHEET_VC_BOOTHS = 'Voucher - Gian hàng';
 var VC_FORM_SOURCE = 'voucher';
 var VC_REDEEM_SOURCE = 'voucher_redeem';
-var VC_TOTAL = 80; // nội bộ: thực phát 80, trang công khai vẫn ghi 50 suất
+var VC_TOTAL = 83; // nội bộ: thực phát 83, trang công khai vẫn ghi 50 suất
 var VC_EXPIRES = new Date('2026-10-24T23:59:59+07:00'); // sau mốc này gian hàng không xác nhận được nữa
 var VC_PAUSED_UNTIL = new Date('2026-10-24T09:00:00+07:00'); // tạm khoá phát voucher mới (phát hiện gian lận 23/10); voucher đã phát vẫn xem/dùng được
 var VC_USED = 'Đã sử dụng';
